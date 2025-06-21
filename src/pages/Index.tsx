@@ -47,10 +47,10 @@ const Index = () => {
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold font-serif text-foreground mb-2">
+          <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">
             Welcome back, Reader! 📚
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-slate-700 text-lg">
             Track your reading journey and discover what your friends are reading.
           </p>
         </div>
@@ -65,10 +65,10 @@ const Index = () => {
           {/* Left Column - Current Reading & Recent Books */}
           <div className="lg:col-span-2 space-y-6">
             {/* Currently Reading */}
-            <Card>
+            <Card className="border-2 border-slate-200">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="font-serif">Currently Reading</CardTitle>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                <CardTitle className="font-serif text-slate-900">Currently Reading</CardTitle>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-900 border border-blue-200">
                   {mockBooks.filter(book => book.status === 'reading').length} books
                 </Badge>
               </CardHeader>
@@ -84,9 +84,9 @@ const Index = () => {
             </Card>
 
             {/* Recent Books */}
-            <Card>
+            <Card className="border-2 border-slate-200">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="font-serif">Your Library</CardTitle>
+                <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
                 <Button variant="outline" size="sm">
                   View All
                 </Button>
@@ -106,18 +106,18 @@ const Index = () => {
             <ActivityFeed />
             
             {/* Quick Actions */}
-            <Card>
+            <Card className="border-2 border-slate-200">
               <CardHeader>
-                <CardTitle className="text-lg font-serif">Quick Actions</CardTitle>
+                <CardTitle className="text-lg font-serif text-slate-900">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start text-slate-800 border-2 border-slate-300 hover:border-slate-500">
                   <span>Browse Friends' Reading</span>
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start text-slate-800 border-2 border-slate-300 hover:border-slate-500">
                   <span>Discover New Books</span>
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start text-slate-800 border-2 border-slate-300 hover:border-slate-500">
                   <span>View Reading Stats</span>
                 </Button>
               </CardContent>

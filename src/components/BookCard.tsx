@@ -21,10 +21,10 @@ interface BookCardProps {
 export const BookCard = ({ book, onClick }: BookCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'reading': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-      case 'finished': return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'planned': return 'bg-slate-100 text-slate-800 hover:bg-slate-200';
-      default: return 'bg-slate-100 text-slate-800';
+      case 'reading': return 'bg-blue-200 text-blue-900 hover:bg-blue-300 border border-blue-300';
+      case 'finished': return 'bg-green-200 text-green-900 hover:bg-green-300 border border-green-300';
+      case 'planned': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-300';
+      default: return 'bg-slate-200 text-slate-900 border border-slate-300';
     }
   };
 
@@ -39,12 +39,12 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
 
   return (
     <Card 
-      className="book-card-shadow transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+      className="book-card-shadow transition-all duration-200 hover:scale-[1.02] cursor-pointer border-2 border-gray-200"
       onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
-          <Badge className={`${getStatusColor(book.status)} transition-colors`}>
+          <Badge className={`${getStatusColor(book.status)} transition-colors font-medium`}>
             {getStatusText(book.status)}
           </Badge>
         </div>
@@ -53,13 +53,13 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
           {book.title}
         </h3>
         
-        <div className="flex items-center text-slate-600 mb-3">
+        <div className="flex items-center text-slate-700 mb-3">
           <UserIcon className="h-4 w-4 mr-1" />
-          <span className="text-sm">{book.author}</span>
+          <span className="text-sm font-medium">{book.author}</span>
         </div>
 
         {(book.dateStarted || book.dateFinished) && (
-          <div className="flex flex-wrap gap-2 text-xs text-slate-600 mb-2">
+          <div className="flex flex-wrap gap-2 text-xs text-slate-700 mb-2">
             {book.dateStarted && (
               <div className="flex items-center">
                 <Calendar className="h-3 w-3 mr-1" />
@@ -76,7 +76,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
         )}
 
         {book.notes && (
-          <p className="text-sm text-slate-700 line-clamp-2 mt-2">
+          <p className="text-sm text-slate-800 line-clamp-2 mt-2">
             {book.notes}
           </p>
         )}

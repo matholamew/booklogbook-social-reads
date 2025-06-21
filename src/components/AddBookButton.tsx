@@ -54,93 +54,93 @@ export const AddBookButton = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50">
+        <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 bg-indigo-600 hover:bg-indigo-700">
           <Plus className="h-6 w-6" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl">Add a Book</DialogTitle>
+          <DialogTitle className="font-serif text-xl text-slate-900">Add a Book</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div>
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title" className="text-slate-800 font-medium">Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter book title..."
-                className="mt-1"
+                className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900"
               />
             </div>
             
             <div>
-              <Label htmlFor="author">Author *</Label>
+              <Label htmlFor="author" className="text-slate-800 font-medium">Author *</Label>
               <Input
                 id="author"
                 value={formData.author}
                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                 placeholder="Enter author name..."
-                className="mt-1"
+                className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900"
               />
             </div>
             
             <div>
-              <Label htmlFor="status">Reading Status</Label>
+              <Label htmlFor="status" className="text-slate-800 font-medium">Reading Status</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="planned">Want to Read</SelectItem>
-                  <SelectItem value="reading">Currently Reading</SelectItem>
-                  <SelectItem value="finished">Finished</SelectItem>
+                <SelectContent className="border-2 border-slate-300">
+                  <SelectItem value="planned" className="text-slate-900">Want to Read</SelectItem>
+                  <SelectItem value="reading" className="text-slate-900">Currently Reading</SelectItem>
+                  <SelectItem value="finished" className="text-slate-900">Finished</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="dateStarted">Date Started</Label>
+                <Label htmlFor="dateStarted" className="text-slate-800 font-medium">Date Started</Label>
                 <Input
                   id="dateStarted"
                   type="date"
                   value={formData.dateStarted}
                   onChange={(e) => setFormData({ ...formData, dateStarted: e.target.value })}
-                  className="mt-1"
+                  className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900"
                 />
               </div>
               
               <div>
-                <Label htmlFor="dateFinished">Date Finished</Label>
+                <Label htmlFor="dateFinished" className="text-slate-800 font-medium">Date Finished</Label>
                 <Input
                   id="dateFinished"
                   type="date"
                   value={formData.dateFinished}
                   onChange={(e) => setFormData({ ...formData, dateFinished: e.target.value })}
-                  className="mt-1"
+                  className="mt-1 border-2 border-slag-300 focus:border-slate-700 text-slate-900"
                 />
               </div>
             </div>
             
             <div>
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes" className="text-slate-800 font-medium">Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Your thoughts, quotes, or reflections..."
-                className="mt-1 min-h-[100px]"
+                className="mt-1 min-h-[100px] border-2 border-slate-300 focus:border-slate-700 text-slate-900"
               />
             </div>
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-2 border-slate-400 text-slate-800">
               Cancel
             </Button>
-            <Button type="submit">Add Book</Button>
+            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">Add Book</Button>
           </div>
         </form>
       </DialogContent>

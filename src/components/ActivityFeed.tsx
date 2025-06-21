@@ -57,23 +57,23 @@ export const ActivityFeed = () => {
 
   const getActionIcon = (action: string) => {
     switch (action) {
-      case 'started': return <Book className="h-4 w-4 text-blue-500" />;
-      case 'finished': return <Book className="h-4 w-4 text-green-500" />;
-      case 'noted': return <Calendar className="h-4 w-4 text-purple-500" />;
-      default: return <Book className="h-4 w-4" />;
+      case 'started': return <Book className="h-4 w-4 text-blue-600" />;
+      case 'finished': return <Book className="h-4 w-4 text-green-600" />;
+      case 'noted': return <Calendar className="h-4 w-4 text-purple-600" />;
+      default: return <Book className="h-4 w-4 text-slate-600" />;
     }
   };
 
   return (
-    <Card>
+    <Card className="border-2 border-slate-200">
       <CardHeader>
-        <CardTitle className="text-lg font-serif text-slate-800">Recent Activity</CardTitle>
+        <CardTitle className="text-lg font-serif text-slate-900">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {mockActivities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
+          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              <AvatarFallback className="bg-indigo-100 text-indigo-800 font-medium border border-indigo-200">
                 {activity.userInitials}
               </AvatarFallback>
             </Avatar>
@@ -81,21 +81,21 @@ export const ActivityFeed = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 {getActionIcon(activity.action)}
-                <p className="text-sm text-slate-800">
-                  <span className="font-medium">{activity.userName}</span>
-                  <span className="text-slate-600"> {getActionText(activity.action)} </span>
-                  <span className="font-medium font-serif">{activity.bookTitle}</span>
-                  <span className="text-slate-600"> by {activity.bookAuthor}</span>
+                <p className="text-sm text-slate-900">
+                  <span className="font-semibold">{activity.userName}</span>
+                  <span className="text-slate-700"> {getActionText(activity.action)} </span>
+                  <span className="font-semibold font-serif">{activity.bookTitle}</span>
+                  <span className="text-slate-700"> by {activity.bookAuthor}</span>
                 </p>
               </div>
               
               {activity.note && (
-                <p className="text-sm text-slate-700 bg-slate-100 p-2 rounded mt-2">
+                <p className="text-sm text-slate-800 bg-slate-200 p-2 rounded mt-2 border border-slate-300">
                   "{activity.note}"
                 </p>
               )}
               
-              <p className="text-xs text-slate-500 mt-1">{activity.timestamp}</p>
+              <p className="text-xs text-slate-600 mt-1 font-medium">{activity.timestamp}</p>
             </div>
           </div>
         ))}
