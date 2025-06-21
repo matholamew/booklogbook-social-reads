@@ -19,18 +19,18 @@ export const Header = () => {
 
           {/* Search */}
           <div className="flex-1 max-w-md relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 h-4 w-4" />
             <Input
               placeholder="Search books or authors..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-muted/50 border-0 focus:bg-white transition-colors"
+              className="pl-10 bg-slate-50 border border-slate-200 focus:bg-white focus:border-primary transition-colors text-slate-900 placeholder:text-slate-500"
             />
           </div>
 
           {/* User Actions */}
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="p-2">
+            <Button variant="ghost" size="sm" className="p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100">
               <User className="h-5 w-5" />
             </Button>
           </div>

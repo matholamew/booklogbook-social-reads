@@ -67,11 +67,11 @@ export const ActivityFeed = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-serif">Recent Activity</CardTitle>
+        <CardTitle className="text-lg font-serif text-slate-800">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {mockActivities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-primary/10 text-primary font-medium">
                 {activity.userInitials}
@@ -81,21 +81,21 @@ export const ActivityFeed = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 {getActionIcon(activity.action)}
-                <p className="text-sm">
+                <p className="text-sm text-slate-800">
                   <span className="font-medium">{activity.userName}</span>
-                  <span className="text-muted-foreground"> {getActionText(activity.action)} </span>
+                  <span className="text-slate-600"> {getActionText(activity.action)} </span>
                   <span className="font-medium font-serif">{activity.bookTitle}</span>
-                  <span className="text-muted-foreground"> by {activity.bookAuthor}</span>
+                  <span className="text-slate-600"> by {activity.bookAuthor}</span>
                 </p>
               </div>
               
               {activity.note && (
-                <p className="text-sm text-muted-foreground bg-muted/30 p-2 rounded mt-2">
+                <p className="text-sm text-slate-700 bg-slate-100 p-2 rounded mt-2">
                   "{activity.note}"
                 </p>
               )}
               
-              <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+              <p className="text-xs text-slate-500 mt-1">{activity.timestamp}</p>
             </div>
           </div>
         ))}

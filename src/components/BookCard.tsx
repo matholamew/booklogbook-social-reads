@@ -23,8 +23,8 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
     switch (status) {
       case 'reading': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
       case 'finished': return 'bg-green-100 text-green-800 hover:bg-green-200';
-      case 'planned': return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'planned': return 'bg-slate-100 text-slate-800 hover:bg-slate-200';
+      default: return 'bg-slate-100 text-slate-800';
     }
   };
 
@@ -49,17 +49,17 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
           </Badge>
         </div>
         
-        <h3 className="font-semibold text-lg text-foreground mb-1 line-clamp-2 font-serif">
+        <h3 className="font-semibold text-lg text-slate-900 mb-1 line-clamp-2 font-serif">
           {book.title}
         </h3>
         
-        <div className="flex items-center text-muted-foreground mb-3">
+        <div className="flex items-center text-slate-600 mb-3">
           <UserIcon className="h-4 w-4 mr-1" />
           <span className="text-sm">{book.author}</span>
         </div>
 
         {(book.dateStarted || book.dateFinished) && (
-          <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mb-2">
+          <div className="flex flex-wrap gap-2 text-xs text-slate-600 mb-2">
             {book.dateStarted && (
               <div className="flex items-center">
                 <Calendar className="h-3 w-3 mr-1" />
@@ -76,7 +76,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
         )}
 
         {book.notes && (
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-2">
+          <p className="text-sm text-slate-700 line-clamp-2 mt-2">
             {book.notes}
           </p>
         )}
