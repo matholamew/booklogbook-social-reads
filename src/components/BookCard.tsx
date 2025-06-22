@@ -21,9 +21,9 @@ interface BookCardProps {
 export const BookCard = ({ book, onClick }: BookCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'reading': return 'bg-blue-200 text-blue-900 hover:bg-blue-300 border border-blue-300';
-      case 'finished': return 'bg-green-200 text-green-900 hover:bg-green-300 border border-green-300';
-      case 'planned': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-300';
+      case 'reading': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-400';
+      case 'finished': return 'bg-slate-800 text-white hover:bg-slate-900 border border-slate-800';
+      case 'planned': return 'bg-white text-slate-900 hover:bg-slate-100 border border-slate-400';
       default: return 'bg-slate-200 text-slate-900 border border-slate-300';
     }
   };
@@ -39,12 +39,12 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
 
   return (
     <Card 
-      className="book-card-shadow transition-all duration-200 hover:scale-[1.02] cursor-pointer border-2 border-gray-200"
+      className="book-card-shadow transition-all duration-200 hover:scale-[1.02] cursor-pointer border-2 border-slate-300 bg-white"
       onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
-          <Badge className={`${getStatusColor(book.status)} transition-colors font-medium`}>
+          <Badge className={`${getStatusColor(book.status)} transition-colors font-medium text-xs`}>
             {getStatusText(book.status)}
           </Badge>
         </div>
@@ -53,7 +53,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
           {book.title}
         </h3>
         
-        <div className="flex items-center text-slate-700 mb-3">
+        <div className="flex items-center text-slate-800 mb-3">
           <UserIcon className="h-4 w-4 mr-1" />
           <span className="text-sm font-medium">{book.author}</span>
         </div>

@@ -57,23 +57,23 @@ export const ActivityFeed = () => {
 
   const getActionIcon = (action: string) => {
     switch (action) {
-      case 'started': return <Book className="h-4 w-4 text-blue-600" />;
-      case 'finished': return <Book className="h-4 w-4 text-green-600" />;
-      case 'noted': return <Calendar className="h-4 w-4 text-purple-600" />;
+      case 'started': return <Book className="h-4 w-4 text-slate-700" />;
+      case 'finished': return <Book className="h-4 w-4 text-slate-900" />;
+      case 'noted': return <Calendar className="h-4 w-4 text-slate-700" />;
       default: return <Book className="h-4 w-4 text-slate-600" />;
     }
   };
 
   return (
-    <Card className="border-2 border-slate-200">
+    <Card className="border-2 border-slate-300 bg-white">
       <CardHeader>
         <CardTitle className="text-lg font-serif text-slate-900">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {mockActivities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-100 transition-colors border border-slate-200">
+          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-200 bg-white">
             <Avatar className="h-10 w-10">
-              <AvatarFallback className="bg-indigo-100 text-indigo-800 font-medium border border-indigo-200">
+              <AvatarFallback className="bg-slate-200 text-slate-900 font-medium border border-slate-300">
                 {activity.userInitials}
               </AvatarFallback>
             </Avatar>
@@ -90,12 +90,12 @@ export const ActivityFeed = () => {
               </div>
               
               {activity.note && (
-                <p className="text-sm text-slate-800 bg-slate-200 p-2 rounded mt-2 border border-slate-300">
+                <p className="text-sm text-slate-800 bg-slate-100 p-2 rounded mt-2 border border-slate-200">
                   "{activity.note}"
                 </p>
               )}
               
-              <p className="text-xs text-slate-600 mt-1 font-medium">{activity.timestamp}</p>
+              <p className="text-xs text-slate-700 mt-1 font-medium">{activity.timestamp}</p>
             </div>
           </div>
         ))}
