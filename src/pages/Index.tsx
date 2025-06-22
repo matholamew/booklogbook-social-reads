@@ -65,7 +65,7 @@ const Index = () => {
           {/* Left Column - Current Reading & Recent Books */}
           <div className="lg:col-span-2 space-y-6">
             {/* Currently Reading */}
-            <Card className="border-2 border-slate-300 bg-white">
+            <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="font-serif text-slate-900">Currently Reading</CardTitle>
                 <Badge variant="secondary" className="bg-slate-200 text-slate-900 border border-slate-300">
@@ -84,7 +84,7 @@ const Index = () => {
             </Card>
 
             {/* Recent Books */}
-            <Card className="border-2 border-slate-300 bg-white">
+            <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
                 <Button variant="outline" size="sm">
@@ -106,7 +106,7 @@ const Index = () => {
             <ActivityFeed />
             
             {/* Quick Actions */}
-            <Card className="border-2 border-slate-300 bg-white">
+            <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
               <CardHeader>
                 <CardTitle className="text-lg font-serif text-slate-900">Quick Actions</CardTitle>
               </CardHeader>

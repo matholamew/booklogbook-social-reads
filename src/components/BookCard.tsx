@@ -39,12 +39,12 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
 
   return (
     <Card 
-      className="book-card-shadow transition-all duration-200 hover:scale-[1.02] cursor-pointer border-2 border-slate-300 bg-white"
+      className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md"
       onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start mb-3">
-          <Badge className={`${getStatusColor(book.status)} transition-colors font-medium text-xs`}>
+          <Badge className={`${getStatusColor(book.status)} transition-all duration-200 font-medium text-xs`}>
             {getStatusText(book.status)}
           </Badge>
         </div>

@@ -15,7 +15,7 @@ export const StatsOverview = ({
 }: StatsOverviewProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card className="border-2 border-slate-300 bg-white">
+      <Card className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-slate-900">Total Books</CardTitle>
           <Book className="h-4 w-4 text-slate-700" />
@@ -26,7 +26,7 @@ export const StatsOverview = ({
         </CardContent>
       </Card>
 
-      <Card className="border-2 border-slate-300 bg-white">
+      <Card className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-slate-900">This Year</CardTitle>
           <Calendar className="h-4 w-4 text-slate-700" />
@@ -37,7 +37,7 @@ export const StatsOverview = ({
         </CardContent>
       </Card>
 
-      <Card className="border-2 border-slate-300 bg-white">
+      <Card className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-slate-900">Following</CardTitle>
           <User className="h-4 w-4 text-slate-700" />

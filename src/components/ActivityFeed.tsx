@@ -65,13 +65,13 @@ export const ActivityFeed = () => {
   };
 
   return (
-    <Card className="border-2 border-slate-300 bg-white">
+    <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
       <CardHeader>
         <CardTitle className="text-lg font-serif text-slate-900">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {mockActivities.map((activity) => (
-          <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-200 bg-white">
+          <div key={activity.id} className="transition-all duration-300 hover:scale-[1.01] cursor-pointer flex items-start gap-3 p-3 rounded-lg hover:bg-slate-100 border border-slate-200 bg-white active:scale-[0.99]">
             <Avatar className="h-10 w-10">
               <AvatarFallback className="bg-slate-200 text-slate-900 font-medium border border-slate-300">
                 {activity.userInitials}
