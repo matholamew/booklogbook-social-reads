@@ -36,18 +36,18 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const queryClient = useQueryClient();
 
   const statusOptions = [
-    { value: 'planned', label: 'To be read' },
+    { value: 'planned', label: 'To Be Read' },
     { value: 'reading', label: 'Currently Reading' },
     { value: 'finished', label: 'Finished' },
-    { value: 'did_not_finish', label: 'Did not finish' },
+    { value: 'did_not_finish', label: 'Did Not Finish' },
   ];
 
   const getStatusText = (status: string) => {
     switch (status) {
       case 'reading': return 'Currently Reading';
       case 'finished': return 'Finished';
-      case 'planned': return 'To be read';
-      case 'did_not_finish': return 'Did not finish';
+      case 'planned': return 'To Be Read';
+      case 'did_not_finish': return 'Did Not Finish';
       default: return status;
     }
   };
