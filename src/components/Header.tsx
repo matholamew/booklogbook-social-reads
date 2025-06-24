@@ -61,7 +61,7 @@ export const Header = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <ProfileEditModal open={editProfileOpen} onOpenChange={setEditProfileOpen} />
+                <ProfileEditModal open={editProfileOpen} onOpenChange={setEditProfileOpen} onCloseComplete={() => setEditProfileOpen(false)} />
               </>
             ) : (
               <Link to="/auth">

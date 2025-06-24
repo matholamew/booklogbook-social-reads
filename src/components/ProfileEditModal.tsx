@@ -11,9 +11,10 @@ import { supabase } from '@/integrations/supabase/client';
 interface ProfileEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCloseComplete?: () => void;
 }
 
-export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) => {
+export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: ProfileEditModalProps) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
@@ -48,6 +49,17 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
       })();
     }
   }, [open, user]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setError('');
+      setLoading(false);
+      setAvatarFile(null);
+      // Optionally call parent callback
+      if (onCloseComplete) onCloseComplete();
+    }
+  }, [open, onCloseComplete]);
 
   // Handle avatar upload
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,6 +116,8 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
       if (updateError) throw updateError;
       toast({ title: 'Profile updated!', description: 'Your profile has been updated.' });
       onOpenChange(false);
+      // Optionally call parent callback after closing
+      if (onCloseComplete) onCloseComplete();
     } catch (err: any) {
       setError(err.message || 'Failed to update profile.');
     } finally {
