@@ -95,7 +95,7 @@
     @apply bg-white text-foreground font-sans;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     color: rgb(15 23 42);
-    background-color: white;
+    background-color: rgb(var(--background, 255 255 255)) !important;
   }
 
   .font-serif {
