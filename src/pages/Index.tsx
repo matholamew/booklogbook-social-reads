@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBooks } from '@/hooks/useUserBooks';
 import { useUserStats } from '@/hooks/useUserStats';
@@ -12,6 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Book, Users, TrendingUp } from 'lucide-react';
+import { EditBookModal } from '@/components/EditBookModal';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 // Mock data for unauthenticated users
 const mockBooks = [
@@ -48,6 +50,14 @@ const Index = () => {
   const { user, loading } = useAuth();
   const { data: userBooks = [], isLoading: booksLoading } = useUserBooks();
   const { data: stats, isLoading: statsLoading } = useUserStats();
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [viewAllOpen, setViewAllOpen] = useState(false);
+
+  const handleBookClick = (book) => {
+    setSelectedBook(book);
+    setEditModalOpen(true);
+  };
 
   if (loading) {
     return (
@@ -106,7 +116,7 @@ const Index = () => {
                         {userBooks
                           .filter(book => book.status === 'reading')
                           .map(book => (
-                            <BookCard key={book.id} book={book} />
+                            <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                           ))}
                       </div>
                     ) : (
@@ -119,7 +129,7 @@ const Index = () => {
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => setViewAllOpen(true)}>
                       View All
                     </Button>
                   </CardHeader>
@@ -129,7 +139,7 @@ const Index = () => {
                     ) : userBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {userBooks.slice(0, 4).map(book => (
-                          <BookCard key={book.id} book={book} />
+                          <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                         ))}
                       </div>
                     ) : (
@@ -162,6 +172,31 @@ const Index = () => {
                 </Card>
               </div>
             </div>
+
+            {/* View All Modal */}
+            <Dialog open={viewAllOpen} onOpenChange={setViewAllOpen}>
+              <DialogContent className="max-w-3xl w-full max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+                <DialogHeader>
+                  <DialogTitle className="font-serif text-xl text-slate-900">All Books in Your Library</DialogTitle>
+                </DialogHeader>
+                {booksLoading ? (
+                  <div className="text-slate-600">Loading your library...</div>
+                ) : userBooks.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {userBooks.map(book => (
+                      <BookCard key={book.id} book={book} onClick={() => { setViewAllOpen(false); handleBookClick(book); }} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-slate-600">Your library is empty. Add your first book to get started!</p>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            {/* Edit Book Modal */}
+            {selectedBook && (
+              <EditBookModal open={editModalOpen} onOpenChange={setEditModalOpen} book={selectedBook} />
+            )}
 
             <AddBookButton />
           </>
