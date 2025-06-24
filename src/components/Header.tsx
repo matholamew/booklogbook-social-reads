@@ -17,6 +17,11 @@ export const Header = () => {
   const { user, signOut } = useAuth();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
+  const handleEditProfileOpenChange = (open: boolean) => {
+    console.log('setEditProfileOpen called with:', open);
+    setEditProfileOpen(open);
+  };
+
   return (
     <header className="bg-white border-b border-border shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3">
@@ -62,7 +67,11 @@ export const Header = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
                 {editProfileOpen && (
-                  <ProfileEditModal open={editProfileOpen} onOpenChange={setEditProfileOpen} onCloseComplete={() => setEditProfileOpen(false)} />
+                  <ProfileEditModal
+                    open={editProfileOpen}
+                    onOpenChange={handleEditProfileOpenChange}
+                    onCloseComplete={() => setEditProfileOpen(false)}
+                  />
                 )}
               </>
             ) : (
