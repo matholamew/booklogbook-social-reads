@@ -86,7 +86,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
         )}
 
         {book.notes && (
-          <p className="text-sm text-slate-800 line-clamp-2 mt-2">
+          <p className="text-sm text-slate-800 line-clamp-2 mt-2 whitespace-pre-line">
             {book.notes}
           </p>
         )}
