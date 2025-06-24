@@ -10,11 +10,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ProfileEditModal } from '@/components/ProfileEditModal';
+import { ProfileEditModal } from './ProfileEditModal';
 import { supabase } from '@/integrations/supabase/client';
 import { BookModal } from '@/components/BookModal';
 import { AuthorModal } from '@/components/AuthorModal';
 import { FriendModal } from '@/components/FriendModal';
+import { toast } from '@/hooks/use-toast';
 
 export const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -274,7 +275,6 @@ export const Header = () => {
                   <ProfileEditModal
                     open={editProfileOpen}
                     onOpenChange={handleEditProfileOpenChange}
-                    onCloseComplete={() => setEditProfileOpen(false)}
                   />
                 )}
               </>
@@ -311,7 +311,18 @@ export const Header = () => {
           open={modalState.type === 'friend'}
           friendId={modalState.id}
           onClose={() => setModalState(null)}
-          onAddFriend={() => {/* TODO: implement add friend */}}
+          onAddFriend={async () => {
+            if (!user || !modalState?.id) return;
+            const { error } = await supabase
+              .from('user_follows')
+              .insert({ follower_id: user.id, following_id: modalState.id });
+            if (error) {
+              toast({ title: 'Error', description: 'Could not add friend. They may already be added.', });
+            } else {
+              toast({ title: 'Friend added!', description: 'You are now following this user.' });
+              setModalState(null);
+            }
+          }}
         />
       )}
     </header>
