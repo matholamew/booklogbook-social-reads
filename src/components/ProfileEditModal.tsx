@@ -125,6 +125,9 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
     }
   };
 
+  // If not open, do not render anything (ensures overlay is removed)
+  if (!open) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
