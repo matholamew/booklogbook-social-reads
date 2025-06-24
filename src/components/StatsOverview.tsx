@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book, Calendar, User } from 'lucide-react';
+import { useState } from 'react';
+import { FollowingModal } from './FollowingModal';
 
 interface StatsOverviewProps {
   totalBooks?: number;
@@ -12,6 +14,7 @@ export const StatsOverview = ({
   booksThisYear = 12, 
   following = 8 
 }: StatsOverviewProps) => {
+  const [followingModalOpen, setFollowingModalOpen] = useState(false);
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md">
@@ -36,7 +39,7 @@ export const StatsOverview = ({
         </CardContent>
       </Card>
 
-      <Card className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md">
+      <Card className="transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer border-2 border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.98] active:shadow-md" onClick={() => setFollowingModalOpen(true)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-slate-900">Following</CardTitle>
           <User className="h-4 w-4 text-slate-700" />
@@ -46,6 +49,7 @@ export const StatsOverview = ({
           <p className="text-xs text-slate-700">Friends & family</p>
         </CardContent>
       </Card>
+      <FollowingModal open={followingModalOpen} onOpenChange={setFollowingModalOpen} />
     </div>
   );
 };
