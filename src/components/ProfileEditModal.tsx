@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,12 +18,10 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch profile on open
   useEffect(() => {
     if (open && user) {
       setLoading(true);
@@ -48,11 +45,9 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     if (!open) {
       setError('');
       setLoading(false);
-      setAvatarFile(null);
     }
   }, [open, user]);
 
-  // Avatar upload
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
@@ -73,13 +68,11 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     }
   };
 
-  // Save profile
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      // Check username uniqueness
       if (username) {
         const { data: existing, error: checkError } = await supabase
           .from('profiles')
@@ -93,7 +86,6 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
           return;
         }
       }
-      // Update profile
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
@@ -113,21 +105,35 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     }
   };
 
-  // If not open, do not render (ensures overlay is removed)
   if (!open) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white"
-        aria-describedby="profile-edit-description"
+    <div
+      style={{
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'rgba(0,0,0,0.5)',
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      onClick={() => onOpenChange(false)}
+    >
+      <div
+        style={{
+          background: 'white',
+          borderRadius: 8,
+          padding: 24,
+          minWidth: 320,
+          maxWidth: 500,
+          width: '100%',
+          position: 'relative',
+          boxShadow: '0 4px 32px rgba(0,0,0,0.15)'
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        <DialogHeader>
-          <DialogTitle className="font-serif text-xl text-slate-900">Edit Profile</DialogTitle>
-        </DialogHeader>
-        <p id="profile-edit-description" className="sr-only">
-          Edit your username, display name, bio, and avatar.
-        </p>
+        <h2 className="font-serif text-xl text-slate-900 mb-4">Edit Profile</h2>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-col items-center gap-2 mb-2">
             <div className="relative">
@@ -215,7 +221,7 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }; 
