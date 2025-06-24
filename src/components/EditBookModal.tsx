@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,7 +32,35 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const fetchBook = async () => {
+      setFetching(true);
+      setError('');
+      const { data, error: fetchError } = await supabase
+        .from('user_books')
+        .select('status, date_started, date_finished, notes')
+        .eq('id', book.id)
+        .single();
+      if (fetchError) {
+        setError('Failed to fetch latest book data.');
+      } else if (data) {
+        setFormData({
+          status: data.status,
+          dateStarted: data.date_started || '',
+          dateFinished: data.date_finished || '',
+          notes: data.notes || '',
+        });
+      }
+      setFetching(false);
+    };
+    if (open) {
+      fetchBook();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, book.id]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +96,9 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900">Edit Book</DialogTitle>
         </DialogHeader>
+        {fetching ? (
+          <div className="p-8 text-center text-slate-600">Loading latest book data...</div>
+        ) : (
         <form onSubmit={handleSave} className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
             <div>
@@ -138,6 +169,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
             </Button>
           </div>
         </form>
+        )}
       </DialogContent>
     </Dialog>
   );
