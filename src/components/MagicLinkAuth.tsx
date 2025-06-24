@@ -45,7 +45,7 @@ export const MagicLinkAuth = () => {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4" aria-live="polite">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4" aria-live="polite">
         <Card className="w-full max-w-md border-2 border-slate-300">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -86,7 +86,7 @@ export const MagicLinkAuth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-2 border-slate-300">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
