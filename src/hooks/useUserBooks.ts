@@ -11,6 +11,7 @@ export interface Book {
   dateStarted?: string;
   dateFinished?: string;
   notes: string;
+  updatedAt: string;
 }
 
 export const useUserBooks = () => {
@@ -51,6 +52,7 @@ export const useUserBooks = () => {
           date_started,
           date_finished,
           notes,
+          updated_at,
           books (
             id,
             title,
@@ -59,7 +61,8 @@ export const useUserBooks = () => {
             )
           )
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
@@ -71,7 +74,8 @@ export const useUserBooks = () => {
         status: userBook.status,
         dateStarted: userBook.date_started,
         dateFinished: userBook.date_finished,
-        notes: userBook.notes || ''
+        notes: userBook.notes || '',
+        updatedAt: userBook.updated_at
       })) as Book[];
     },
     enabled: !!user,

@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Book, Users, TrendingUp } from 'lucide-react';
+import { Book, Users, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { EditBookModal } from '@/components/EditBookModal';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -53,10 +53,19 @@ const Index = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
   const [viewAllOpen, setViewAllOpen] = useState(false);
+  const [viewAllPage, setViewAllPage] = useState(1);
+  const booksPerPage = 10;
+  const totalPages = Math.ceil(userBooks.length / booksPerPage);
+  const paginatedBooks = userBooks.slice((viewAllPage - 1) * booksPerPage, viewAllPage * booksPerPage);
 
   const handleBookClick = (book) => {
     setSelectedBook(book);
     setEditModalOpen(true);
+  };
+
+  const handleOpenViewAll = () => {
+    setViewAllPage(1);
+    setViewAllOpen(true);
   };
 
   if (loading) {
@@ -129,7 +138,7 @@ const Index = () => {
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
-                    <Button variant="outline" size="sm" onClick={() => setViewAllOpen(true)}>
+                    <Button variant="outline" size="sm" onClick={handleOpenViewAll}>
                       View All
                     </Button>
                   </CardHeader>
@@ -138,7 +147,7 @@ const Index = () => {
                       <div className="text-slate-600">Loading your library...</div>
                     ) : userBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {userBooks.slice(0, 4).map(book => (
+                        {userBooks.slice(0, 6).map(book => (
                           <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                         ))}
                       </div>
@@ -182,11 +191,42 @@ const Index = () => {
                 {booksLoading ? (
                   <div className="text-slate-600">Loading your library...</div>
                 ) : userBooks.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {userBooks.map(book => (
-                      <BookCard key={book.id} book={book} onClick={() => { setViewAllOpen(false); handleBookClick(book); }} />
-                    ))}
-                  </div>
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                      {paginatedBooks.map(book => (
+                        <BookCard key={book.id} book={book} onClick={() => { setViewAllOpen(false); handleBookClick(book); }} />
+                      ))}
+                    </div>
+                    {/* Pagination Controls */}
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                      <button
+                        className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50"
+                        onClick={() => setViewAllPage(p => Math.max(1, p - 1))}
+                        disabled={viewAllPage === 1}
+                        aria-label="Previous page"
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </button>
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                          key={i + 1}
+                          className={`px-3 py-1 rounded border ${viewAllPage === i + 1 ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-300'}`}
+                          onClick={() => setViewAllPage(i + 1)}
+                          aria-label={`Go to page ${i + 1}`}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+                      <button
+                        className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50"
+                        onClick={() => setViewAllPage(p => Math.min(totalPages, p + 1))}
+                        disabled={viewAllPage === totalPages}
+                        aria-label="Next page"
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <p className="text-slate-600">Your library is empty. Add your first book to get started!</p>
                 )}
