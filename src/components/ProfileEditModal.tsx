@@ -11,71 +11,60 @@ import { supabase } from '@/integrations/supabase/client';
 interface ProfileEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCloseComplete?: () => void;
 }
 
-export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: ProfileEditModalProps) => {
+export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) => {
   const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    username: '',
-    displayName: '',
-    bio: '',
-    avatarUrl: '',
-  });
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch current profile on open
+  // Fetch profile on open
   useEffect(() => {
     if (open && user) {
-      (async () => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('username, display_name, bio, avatar_url')
-          .eq('id', user.id)
-          .single();
-        if (error) {
-          setError('Failed to load profile.');
-        } else {
-          setFormData({
-            username: data.username || '',
-            displayName: data.display_name || '',
-            bio: data.bio || '',
-            avatarUrl: data.avatar_url || '',
-          });
-        }
-      })();
+      setLoading(true);
+      supabase
+        .from('profiles')
+        .select('username, display_name, bio, avatar_url')
+        .eq('id', user.id)
+        .single()
+        .then(({ data, error }) => {
+          if (error) {
+            setError('Failed to load profile.');
+          } else {
+            setUsername(data.username || '');
+            setDisplayName(data.display_name || '');
+            setBio(data.bio || '');
+            setAvatarUrl(data.avatar_url || '');
+          }
+          setLoading(false);
+        });
     }
-  }, [open, user]);
-
-  // Reset state when modal closes
-  useEffect(() => {
     if (!open) {
-      console.log('ProfileEditModal closed');
       setError('');
       setLoading(false);
       setAvatarFile(null);
-      // Optionally call parent callback
-      if (onCloseComplete) onCloseComplete();
     }
-  }, [open, onCloseComplete]);
+  }, [open, user]);
 
-  // Handle avatar upload
+  // Avatar upload
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    setAvatarFile(file);
     setLoading(true);
     setError('');
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `avatars/${user.id}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
+      const ext = file.name.split('.').pop();
+      const path = `avatars/${user.id}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
       if (uploadError) throw uploadError;
-      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      setFormData((prev) => ({ ...prev, avatarUrl: publicUrlData.publicUrl }));
+      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(path);
+      setAvatarUrl(publicUrlData.publicUrl);
       toast({ title: 'Avatar uploaded!', description: 'Your avatar has been updated.' });
     } catch (err: any) {
       setError(err.message || 'Failed to upload avatar.');
@@ -84,18 +73,18 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
     }
   };
 
-  // Handle form submit
+  // Save profile
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
       // Check username uniqueness
-      if (formData.username) {
+      if (username) {
         const { data: existing, error: checkError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('username', formData.username)
+          .eq('username', username)
           .neq('id', user.id);
         if (checkError) throw checkError;
         if (existing && existing.length > 0) {
@@ -108,17 +97,15 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          username: formData.username || null,
-          display_name: formData.displayName || null,
-          bio: formData.bio || null,
-          avatar_url: formData.avatarUrl || null,
+          username: username || null,
+          display_name: displayName || null,
+          bio: bio || null,
+          avatar_url: avatarUrl || null,
         })
         .eq('id', user.id);
       if (updateError) throw updateError;
       toast({ title: 'Profile updated!', description: 'Your profile has been updated.' });
       onOpenChange(false);
-      // Optionally call parent callback after closing
-      if (onCloseComplete) onCloseComplete();
     } catch (err: any) {
       setError(err.message || 'Failed to update profile.');
     } finally {
@@ -126,7 +113,7 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
     }
   };
 
-  // If not open, do not render anything (ensures overlay is removed)
+  // If not open, do not render (ensures overlay is removed)
   if (!open) return null;
 
   return (
@@ -144,8 +131,8 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-col items-center gap-2 mb-2">
             <div className="relative">
-              {formData.avatarUrl ? (
-                <img src={formData.avatarUrl} alt="Avatar" className="h-20 w-20 rounded-full object-cover border-2 border-slate-300" />
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="h-20 w-20 rounded-full object-cover border-2 border-slate-300" />
               ) : (
                 <div className="h-20 w-20 rounded-full bg-slate-200 flex items-center justify-center text-3xl text-slate-600 border-2 border-slate-300">
                   ?
@@ -176,8 +163,8 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
             <Label htmlFor="username" className="text-slate-800 font-medium">Username</Label>
             <Input
               id="username"
-              value={formData.username}
-              onChange={e => setFormData({ ...formData, username: e.target.value })}
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               placeholder="Choose a unique username"
               className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               autoComplete="off"
@@ -193,8 +180,8 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
             <Label htmlFor="displayName" className="text-slate-800 font-medium">Display Name</Label>
             <Input
               id="displayName"
-              value={formData.displayName}
-              onChange={e => setFormData({ ...formData, displayName: e.target.value })}
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value)}
               placeholder="Your name as shown to others"
               className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               autoComplete="off"
@@ -206,8 +193,8 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
             <Label htmlFor="bio" className="text-slate-800 font-medium">Bio</Label>
             <Textarea
               id="bio"
-              value={formData.bio}
-              onChange={e => setFormData({ ...formData, bio: e.target.value })}
+              value={bio}
+              onChange={e => setBio(e.target.value)}
               placeholder="Tell us about yourself..."
               className="mt-1 min-h-[80px] border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               maxLength={300}
