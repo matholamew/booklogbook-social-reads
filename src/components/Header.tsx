@@ -181,6 +181,7 @@ export const Header = () => {
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onClick={() => handleResultSelect({ ...book, _type: 'book' })}
+                                  onMouseEnter={() => setHighlightedIndex(flatIdx)}
                                 >
                                   {book.title}
                                 </div>
@@ -200,6 +201,7 @@ export const Header = () => {
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onClick={() => handleResultSelect({ ...author, _type: 'author' })}
+                                  onMouseEnter={() => setHighlightedIndex(flatIdx)}
                                 >
                                   {author.name}
                                 </div>
@@ -219,6 +221,7 @@ export const Header = () => {
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onClick={() => handleResultSelect({ ...friend, _type: 'friend' })}
+                                  onMouseEnter={() => setHighlightedIndex(flatIdx)}
                                 >
                                   {friend.avatar_url ? (
                                     <img src={friend.avatar_url} alt={friend.username} className="h-6 w-6 rounded-full object-cover border border-slate-300" />
