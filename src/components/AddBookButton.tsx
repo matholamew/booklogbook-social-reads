@@ -7,6 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const AddBookButton = () => {
   const [open, setOpen] = useState(false);
@@ -19,32 +22,100 @@ export const AddBookButton = () => {
     notes: ''
   });
   const [error, setError] = useState('');
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+
     if (!formData.title || !formData.author) {
       setError("Please fill in both title and author.");
       return;
     }
+    if (!user) {
+      setError("You must be logged in to add a book.");
+      return;
+    }
 
-    // Here you would typically save to your database
-    console.log('Saving book:', formData);
-    
-    toast({
-      title: "Book Added!",
-      description: `${formData.title} has been added to your library.`
-    });
+    try {
+      // 1. Check or insert author
+      let { data: authorData, error: authorError } = await supabase
+        .from('authors')
+        .select('id')
+        .eq('name', formData.author)
+        .single();
+      let author_id = authorData?.id;
+      if (!author_id) {
+        const { data: newAuthor, error: insertAuthorError } = await supabase
+          .from('authors')
+          .insert({ name: formData.author })
+          .select('id')
+          .single();
+        if (insertAuthorError) throw insertAuthorError;
+        author_id = newAuthor.id;
+      }
 
-    setFormData({
-      title: '',
-      author: '',
-      dateStarted: '',
-      dateFinished: '',
-      status: 'reading',
-      notes: ''
-    });
-    setOpen(false);
+      // 2. Check or insert book
+      let { data: bookData, error: bookError } = await supabase
+        .from('books')
+        .select('id')
+        .eq('title', formData.title)
+        .eq('author_id', author_id)
+        .single();
+      let book_id = bookData?.id;
+      if (!book_id) {
+        const { data: newBook, error: insertBookError } = await supabase
+          .from('books')
+          .insert({ title: formData.title, author_id })
+          .select('id')
+          .single();
+        if (insertBookError) throw insertBookError;
+        book_id = newBook.id;
+      }
+
+      // 3. Check if user already has this book
+      const { data: userBookData, error: userBookError } = await supabase
+        .from('user_books')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('book_id', book_id)
+        .maybeSingle();
+      if (userBookData && userBookData.id) {
+        setError('You have already added this book to your library.');
+        return;
+      }
+
+      // 4. Insert into user_books
+      const { error: insertUserBookError } = await supabase
+        .from('user_books')
+        .insert({
+          user_id: user.id,
+          book_id,
+          status: formData.status,
+          date_started: formData.dateStarted || null,
+          date_finished: formData.dateFinished || null,
+          notes: formData.notes || null,
+        });
+      if (insertUserBookError) throw insertUserBookError;
+
+      toast({
+        title: "Book Added!",
+        description: `${formData.title} has been added to your library.`
+      });
+      setFormData({
+        title: '',
+        author: '',
+        dateStarted: '',
+        dateFinished: '',
+        status: 'reading',
+        notes: ''
+      });
+      setOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+    } catch (err: any) {
+      setError(err.message || 'An error occurred while adding the book.');
+    }
   };
 
   return (
