@@ -53,6 +53,7 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
   // Reset state when modal closes
   useEffect(() => {
     if (!open) {
+      console.log('ProfileEditModal closed');
       setError('');
       setLoading(false);
       setAvatarFile(null);
@@ -130,10 +131,16 @@ export const ProfileEditModal = ({ open, onOpenChange, onCloseComplete }: Profil
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+      <DialogContent
+        className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white"
+        aria-describedby="profile-edit-description"
+      >
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900">Edit Profile</DialogTitle>
         </DialogHeader>
+        <p id="profile-edit-description" className="sr-only">
+          Edit your username, display name, bio, and avatar.
+        </p>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-col items-center gap-2 mb-2">
             <div className="relative">
