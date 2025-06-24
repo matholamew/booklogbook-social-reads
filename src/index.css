@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -112,4 +111,14 @@
   .book-card-shadow:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
+}
+
+/* Fallback: forcibly override any yellow background in dropdowns, popovers, and inputs */
+.dropdown-menu, .popover, .select, input, textarea, select {
+  background-color: white !important;
+  color: #111827 !important;
+}
+.dark .dropdown-menu, .dark .popover, .dark .select, .dark input, .dark textarea, .dark select {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
 }

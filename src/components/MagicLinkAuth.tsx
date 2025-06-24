@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ export const MagicLinkAuth = () => {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4" aria-live="polite">
         <Card className="w-full max-w-md border-2 border-slate-300">
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -108,13 +107,14 @@ export const MagicLinkAuth = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border-2 border-slate-300 focus:border-slate-800"
+                className="border-2 border-slate-300 focus:border-slate-800 bg-white"
                 required
+                autoFocus
               />
             </div>
             
             {error && (
-              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200">
+              <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200" aria-live="polite">
                 {error}
               </div>
             )}

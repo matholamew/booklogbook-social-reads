@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,16 +18,13 @@ export const AddBookButton = () => {
     status: 'reading',
     notes: ''
   });
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title || !formData.author) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in both title and author.",
-        variant: "destructive"
-      });
+      setError("Please fill in both title and author.");
       return;
     }
 
@@ -54,7 +50,7 @@ export const AddBookButton = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 bg-slate-700 hover:bg-slate-800">
+        <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 bg-slate-700 hover:bg-slate-800" aria-label="Add a book">
           <Plus className="h-6 w-6" />
         </Button>
       </DialogTrigger>
@@ -72,6 +68,7 @@ export const AddBookButton = () => {
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter book title..."
                 className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
+                aria-required="true"
               />
             </div>
             
@@ -83,6 +80,7 @@ export const AddBookButton = () => {
                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                 placeholder="Enter author name..."
                 className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
+                aria-required="true"
               />
             </div>
             
@@ -135,6 +133,12 @@ export const AddBookButton = () => {
               />
             </div>
           </div>
+          
+          {error && (
+            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200" aria-live="polite">
+              {error}
+            </div>
+          )}
           
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-2 border-slate-400 text-slate-800 bg-white hover:bg-slate-50">
