@@ -81,7 +81,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-6xl mx-auto px-4 py-6 pt-4 sm:pt-4 md:pt-4 lg:pt-0">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">
