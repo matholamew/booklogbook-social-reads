@@ -16,7 +16,7 @@ interface EditBookModalProps {
     id: string;
     title: string;
     author: string;
-    status: 'reading' | 'finished' | 'planned';
+    status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
     dateStarted?: string;
     dateFinished?: string;
     notes?: string;
@@ -34,6 +34,23 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const queryClient = useQueryClient();
+
+  const statusOptions = [
+    { value: 'planned', label: 'To be read' },
+    { value: 'reading', label: 'Currently Reading' },
+    { value: 'finished', label: 'Finished' },
+    { value: 'did_not_finish', label: 'Did not finish' },
+  ];
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'reading': return 'Currently Reading';
+      case 'finished': return 'Finished';
+      case 'planned': return 'To be read';
+      case 'did_not_finish': return 'Did not finish';
+      default: return status;
+    }
+  };
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -116,9 +133,9 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="border-2 border-slate-300 bg-white">
-                  <SelectItem value="planned" className="text-slate-900">Want to Read</SelectItem>
-                  <SelectItem value="reading" className="text-slate-900">Currently Reading</SelectItem>
-                  <SelectItem value="finished" className="text-slate-900">Finished</SelectItem>
+                  {statusOptions.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value} className="text-slate-900">{opt.label}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -141,6 +158,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
                   value={formData.dateFinished}
                   onChange={(e) => setFormData({ ...formData, dateFinished: e.target.value })}
                   className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
+                  disabled={formData.status === 'planned' || formData.status === 'reading'}
                 />
               </div>
             </div>

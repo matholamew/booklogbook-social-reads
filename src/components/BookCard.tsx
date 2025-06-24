@@ -9,7 +9,7 @@ interface Book {
   dateStarted?: string;
   dateFinished?: string;
   notes?: string;
-  status: 'reading' | 'finished' | 'planned';
+  status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
 }
 
 interface BookCardProps {
@@ -30,6 +30,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
       case 'reading': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-400';
       case 'finished': return 'bg-slate-800 text-white hover:bg-slate-900 border border-slate-800';
       case 'planned': return 'bg-white text-slate-900 hover:bg-slate-100 border border-slate-400';
+      case 'did_not_finish': return 'bg-red-100 text-red-800 border border-red-400';
       default: return 'bg-slate-200 text-slate-900 border border-slate-300';
     }
   };
@@ -38,7 +39,8 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
     switch (status) {
       case 'reading': return 'Currently Reading';
       case 'finished': return 'Finished';
-      case 'planned': return 'Want to Read';
+      case 'planned': return 'To be read';
+      case 'did_not_finish': return 'Did not finish';
       default: return status;
     }
   };
