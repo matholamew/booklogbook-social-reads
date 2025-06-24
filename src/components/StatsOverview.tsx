@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book, Calendar, User } from 'lucide-react';
 
@@ -33,7 +32,7 @@ export const StatsOverview = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-slate-900">{booksThisYear}</div>
-          <p className="text-xs text-slate-700">Books read in 2024</p>
+          <p className="text-xs text-slate-700">Books read in {new Date().getFullYear()}</p>
         </CardContent>
       </Card>
 

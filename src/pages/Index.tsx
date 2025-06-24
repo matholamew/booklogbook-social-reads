@@ -14,6 +14,7 @@ import { Book, Users, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react
 import { EditBookModal } from '@/components/EditBookModal';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import Footer from '@/components/Footer';
 
 // Mock data for unauthenticated users
 const mockBooks = [
@@ -291,6 +292,7 @@ const Index = () => {
           </>
         )}
       </main>
+      <Footer />
     </div>
   );
 };
