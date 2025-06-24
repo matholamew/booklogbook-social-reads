@@ -160,3 +160,7 @@ select:-webkit-autofill {
   border-color: #1e293b !important;
   box-shadow: 0 0 0 2px #1e293b !important;
 }
+
+html, body, #root, .min-h-screen, .app-bg-fix {
+  background-color: #fff !important;
+}
