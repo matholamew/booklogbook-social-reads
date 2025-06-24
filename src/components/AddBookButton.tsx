@@ -54,11 +54,11 @@ export const AddBookButton = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 bg-indigo-600 hover:bg-indigo-700">
+        <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-shadow z-50 bg-slate-700 hover:bg-slate-800">
           <Plus className="h-6 w-6" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900">Add a Book</DialogTitle>
         </DialogHeader>
@@ -71,7 +71,7 @@ export const AddBookButton = () => {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter book title..."
-                className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900"
+                className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               />
             </div>
             
@@ -82,17 +82,17 @@ export const AddBookButton = () => {
                 value={formData.author}
                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                 placeholder="Enter author name..."
-                className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900"
+                className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               />
             </div>
             
             <div>
               <Label htmlFor="status" className="text-slate-800 font-medium">Reading Status</Label>
               <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
-                <SelectTrigger className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900">
+                <SelectTrigger className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-2 border-slate-300">
+                <SelectContent className="border-2 border-slate-300 bg-white">
                   <SelectItem value="planned" className="text-slate-900">Want to Read</SelectItem>
                   <SelectItem value="reading" className="text-slate-900">Currently Reading</SelectItem>
                   <SelectItem value="finished" className="text-slate-900">Finished</SelectItem>
@@ -108,7 +108,7 @@ export const AddBookButton = () => {
                   type="date"
                   value={formData.dateStarted}
                   onChange={(e) => setFormData({ ...formData, dateStarted: e.target.value })}
-                  className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900"
+                  className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
                 />
               </div>
               
@@ -119,7 +119,7 @@ export const AddBookButton = () => {
                   type="date"
                   value={formData.dateFinished}
                   onChange={(e) => setFormData({ ...formData, dateFinished: e.target.value })}
-                  className="mt-1 border-2 border-slag-300 focus:border-slate-700 text-slate-900"
+                  className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
                 />
               </div>
             </div>
@@ -131,16 +131,16 @@ export const AddBookButton = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Your thoughts, quotes, or reflections..."
-                className="mt-1 min-h-[100px] border-2 border-slate-300 focus:border-slate-700 text-slate-900"
+                className="mt-1 min-h-[100px] border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               />
             </div>
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-2 border-slate-400 text-slate-800">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="border-2 border-slate-400 text-slate-800 bg-white hover:bg-slate-50">
               Cancel
             </Button>
-            <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">Add Book</Button>
+            <Button type="submit" className="bg-slate-700 hover:bg-slate-800 text-white">Add Book</Button>
           </div>
         </form>
       </DialogContent>
