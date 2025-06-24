@@ -164,3 +164,10 @@ select:-webkit-autofill {
 html, body, #root, .min-h-screen, .app-bg-fix {
   background-color: #fff !important;
 }
+
+header, header + main, header + div, .header-bg-fix {
+  background-color: #fff !important;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  border-color: #e2e8f0 !important; /* Tailwind border-border default */
+}
