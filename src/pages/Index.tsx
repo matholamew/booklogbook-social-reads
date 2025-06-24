@@ -1,4 +1,7 @@
 
+import { useAuth } from '@/hooks/useAuth';
+import { useUserBooks } from '@/hooks/useUserBooks';
+import { useUserStats } from '@/hooks/useUserStats';
 import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
 import { ActivityFeed } from '@/components/ActivityFeed';
@@ -7,8 +10,10 @@ import { AddBookButton } from '@/components/AddBookButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Book, Users, TrendingUp } from 'lucide-react';
 
-// Mock data for current user's books
+// Mock data for unauthenticated users
 const mockBooks = [
   {
     id: '1',
@@ -40,6 +45,18 @@ const mockBooks = [
 ];
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const { data: userBooks = [], isLoading: booksLoading } = useUserBooks();
+  const { data: stats, isLoading: statsLoading } = useUserStats();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-slate-600">Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -48,85 +65,157 @@ const Index = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">
-            Welcome back, Reader! 📚
+            {user ? `Welcome back, Reader! 📚` : 'Track Your Reading Journey 📚'}
           </h1>
           <p className="text-slate-800 text-lg">
-            Track your reading journey and discover what your friends are reading.
+            {user 
+              ? 'Track your reading journey and discover what your friends are reading.'
+              : 'Join BookLogBook to organize your reading, track progress, and connect with fellow book lovers.'
+            }
           </p>
         </div>
 
-        {/* Stats Overview */}
-        <div className="mb-8">
-          <StatsOverview />
-        </div>
+        {user ? (
+          <>
+            {/* Stats Overview */}
+            <div className="mb-8">
+              <StatsOverview 
+                totalBooks={stats?.totalBooks}
+                booksThisYear={stats?.booksThisYear}
+                following={stats?.following}
+              />
+            </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Current Reading & Recent Books */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Currently Reading */}
-            <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="font-serif text-slate-900">Currently Reading</CardTitle>
-                <Badge variant="secondary" className="bg-slate-200 text-slate-900 border border-slate-300">
-                  {mockBooks.filter(book => book.status === 'reading').length} books
-                </Badge>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column - Current Reading & Recent Books */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Currently Reading */}
+                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="font-serif text-slate-900">Currently Reading</CardTitle>
+                    <Badge variant="secondary" className="bg-slate-200 text-slate-900 border border-slate-300">
+                      {userBooks.filter(book => book.status === 'reading').length} books
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    {booksLoading ? (
+                      <div className="text-slate-600">Loading your books...</div>
+                    ) : userBooks.filter(book => book.status === 'reading').length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {userBooks
+                          .filter(book => book.status === 'reading')
+                          .map(book => (
+                            <BookCard key={book.id} book={book} />
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-slate-600">No books currently being read. Start reading something new!</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Recent Books */}
+                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
+                    <Button variant="outline" size="sm">
+                      View All
+                    </Button>
+                  </CardHeader>
+                  <CardContent>
+                    {booksLoading ? (
+                      <div className="text-slate-600">Loading your library...</div>
+                    ) : userBooks.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {userBooks.slice(0, 4).map(book => (
+                          <BookCard key={book.id} book={book} />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-slate-600">Your library is empty. Add your first book to get started!</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right Column - Activity Feed */}
+              <div className="space-y-6">
+                <ActivityFeed />
+                
+                {/* Quick Actions */}
+                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-serif text-slate-900">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
+                      <span>Browse Friends' Reading</span>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
+                      <span>Discover New Books</span>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
+                      <span>View Reading Stats</span>
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            <AddBookButton />
+          </>
+        ) : (
+          <>
+            {/* Features showcase for non-authenticated users */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+              <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50 text-center p-6">
+                <Book className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                <h3 className="text-lg font-serif text-slate-900 mb-2">Track Your Reading</h3>
+                <p className="text-slate-600">Keep a digital log of all the books you've read, are reading, or want to read.</p>
+              </Card>
+              
+              <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50 text-center p-6">
+                <TrendingUp className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                <h3 className="text-lg font-serif text-slate-900 mb-2">Monitor Progress</h3>
+                <p className="text-slate-600">Set reading goals and track your progress throughout the year.</p>
+              </Card>
+              
+              <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50 text-center p-6">
+                <Users className="h-12 w-12 text-slate-700 mx-auto mb-4" />
+                <h3 className="text-lg font-serif text-slate-900 mb-2">Connect with Readers</h3>
+                <p className="text-slate-600">Follow friends and family to see what they're reading and get recommendations.</p>
+              </Card>
+            </div>
+
+            {/* Sample books preview */}
+            <Card className="mb-8 border-2 border-slate-300 bg-white">
+              <CardHeader>
+                <CardTitle className="font-serif text-slate-900">What BookLogBook looks like</CardTitle>
+                <p className="text-slate-600">Here's a preview of how you can organize your reading:</p>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {mockBooks
-                    .filter(book => book.status === 'reading')
-                    .map(book => (
-                      <BookCard key={book.id} book={book} />
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Recent Books */}
-            <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
-                <Button variant="outline" size="sm">
-                  View All
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {mockBooks.map(book => (
                     <BookCard key={book.id} book={book} />
                   ))}
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Right Column - Activity Feed */}
-          <div className="space-y-6">
-            <ActivityFeed />
-            
-            {/* Quick Actions */}
-            <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
-              <CardHeader>
-                <CardTitle className="text-lg font-serif text-slate-900">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
-                  <span>Browse Friends' Reading</span>
+            {/* Call to action */}
+            <div className="text-center bg-slate-50 rounded-lg p-8 border-2 border-slate-300">
+              <h2 className="text-2xl font-serif text-slate-900 mb-4">Ready to start your reading journey?</h2>
+              <p className="text-slate-600 mb-6">Join thousands of readers who are already tracking their books with BookLogBook.</p>
+              <Link to="/auth">
+                <Button size="lg" className="bg-slate-800 hover:bg-slate-900 text-white">
+                  Get Started with Email
                 </Button>
-                <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
-                  <span>Discover New Books</span>
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
-                  <span>View Reading Stats</span>
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </Link>
+            </div>
+          </>
+        )}
       </main>
-
-      <AddBookButton />
     </div>
   );
 };
