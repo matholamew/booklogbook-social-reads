@@ -45,8 +45,8 @@ export const MagicLinkAuth = () => {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4" aria-live="polite">
-        <Card className="w-full max-w-md border-2 border-slate-300">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4 app-bg-fix" style={{ backgroundColor: '#fff' }} aria-live="polite">
+        <Card className="w-full max-w-md border-2 border-slate-300 bg-white" style={{ backgroundColor: '#fff' }}>
           <CardHeader className="text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -86,8 +86,8 @@ export const MagicLinkAuth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md border-2 border-slate-300">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4 app-bg-fix" style={{ backgroundColor: '#fff' }}>
+      <Card className="w-full max-w-md border-2 border-slate-300 bg-white" style={{ backgroundColor: '#fff' }}>
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
             <Mail className="h-6 w-6 text-slate-600" />
