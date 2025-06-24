@@ -17,6 +17,13 @@ interface BookCardProps {
   onClick?: () => void;
 }
 
+// Helper to parse YYYY-MM-DD as local date
+function parseLocalDate(dateString?: string) {
+  if (!dateString) return null;
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export const BookCard = ({ book, onClick }: BookCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -66,13 +73,13 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
             {book.dateStarted && (
               <div className="flex items-center">
                 <Calendar className="h-3 w-3 mr-1" />
-                Started: {new Date(book.dateStarted).toLocaleDateString()}
+                Started: {parseLocalDate(book.dateStarted)?.toLocaleDateString()}
               </div>
             )}
             {book.dateFinished && (
               <div className="flex items-center">
                 <Calendar className="h-3 w-3 mr-1" />
-                Finished: {new Date(book.dateFinished).toLocaleDateString()}
+                Finished: {parseLocalDate(book.dateFinished)?.toLocaleDateString()}
               </div>
             )}
           </div>
