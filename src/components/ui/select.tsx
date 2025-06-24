@@ -116,18 +116,17 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-slate-200 focus:text-slate-900 active:bg-slate-300 active:text-slate-900 data-[highlighted]:bg-slate-200 data-[highlighted]:text-slate-900 data-[state=checked]:bg-slate-300 data-[state=checked]:text-slate-900 dark:focus:bg-slate-700 dark:focus:text-slate-100 dark:active:bg-slate-600 dark:active:text-slate-100 dark:data-[highlighted]:bg-slate-700 dark:data-[highlighted]:text-slate-100 dark:data-[state=checked]:bg-slate-600 dark:data-[state=checked]:text-slate-100",
+      "relative flex cursor-default select-none items-center justify-between rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-slate-200 focus:text-slate-900 active:bg-slate-300 active:text-slate-900 data-[highlighted]:bg-slate-200 data-[highlighted]:text-slate-900 data-[state=checked]:bg-slate-300 data-[state=checked]:text-slate-900 dark:focus:bg-slate-700 dark:focus:text-slate-100 dark:active:bg-slate-600 dark:active:text-slate-100 dark:data-[highlighted]:bg-slate-700 dark:data-[highlighted]:text-slate-100 dark:data-[state=checked]:bg-slate-600 dark:data-[state=checked]:text-slate-100",
       className
     )}
     {...props}
   >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
+    <span className="flex h-3.5 w-3.5 items-center justify-center ml-2">
       <SelectPrimitive.ItemIndicator>
         <Check className="h-4 w-4" />
       </SelectPrimitive.ItemIndicator>
     </span>
-
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
   </SelectPrimitive.Item>
 ))
 SelectItem.displayName = SelectPrimitive.Item.displayName

@@ -123,6 +123,13 @@
   color: #f8fafc !important;
 }
 
+/* Remove browser yellow autofill and focus ring, use brand color for focus */
+input:focus, textarea:focus, select:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #334155 !important; /* slate-700 */
+  border-color: #334155 !important;
+}
+
 input:-webkit-autofill,
 textarea:-webkit-autofill,
 select:-webkit-autofill {
@@ -130,7 +137,17 @@ select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px white inset !important;
   background-color: white !important;
   color: #111827 !important;
+  outline: none !important;
+  border-color: #334155 !important;
+  box-shadow: 0 0 0 2px #334155 !important;
 }
+
+.dark input:focus, .dark textarea:focus, .dark select:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px #1e293b !important; /* slate-800 */
+  border-color: #1e293b !important;
+}
+
 .dark input:-webkit-autofill,
 .dark textarea:-webkit-autofill,
 .dark select:-webkit-autofill {
@@ -138,4 +155,7 @@ select:-webkit-autofill {
   -webkit-box-shadow: 0 0 0 1000px #1e293b inset !important;
   background-color: #1e293b !important;
   color: #f8fafc !important;
+  outline: none !important;
+  border-color: #1e293b !important;
+  box-shadow: 0 0 0 2px #1e293b !important;
 }
