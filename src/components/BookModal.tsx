@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface BookModalProps {
   open: boolean;
@@ -32,8 +33,11 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   if (!open || !bookId) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-      <div className="bg-white rounded-lg p-6 min-w-[320px] max-w-[400px] w-full relative" onClick={e => e.stopPropagation()}>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl text-slate-900">Book</DialogTitle>
+        </DialogHeader>
         {loading ? (
           <div className="text-slate-700">Loading...</div>
         ) : book ? (
@@ -41,12 +45,11 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
             <h2 className="font-serif text-2xl text-slate-900 mb-2">{book.title}</h2>
             <div className="text-slate-700 mb-4">by {book.authors?.name || 'Unknown Author'}</div>
             <Button className="w-full bg-slate-700 hover:bg-slate-800 text-white" onClick={onAddToLibrary}>Add to Library</Button>
-            <Button variant="outline" className="w-full mt-2" onClick={onClose}>Close</Button>
           </>
         ) : (
           <div className="text-slate-700">Book not found.</div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }; 

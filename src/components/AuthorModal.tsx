@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 interface AuthorModalProps {
   open: boolean;
@@ -41,8 +42,11 @@ export const AuthorModal = ({ open, authorId, onClose, onBookClick }: AuthorModa
   if (!open || !authorId) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-      <div className="bg-white rounded-lg p-6 min-w-[320px] max-w-[400px] w-full relative" onClick={e => e.stopPropagation()}>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl text-slate-900">Author</DialogTitle>
+        </DialogHeader>
         {loading ? (
           <div className="text-slate-700">Loading...</div>
         ) : author ? (
@@ -61,12 +65,11 @@ export const AuthorModal = ({ open, authorId, onClose, onBookClick }: AuthorModa
                 </li>
               ))}
             </ul>
-            <Button variant="outline" className="w-full" onClick={onClose}>Close</Button>
           </>
         ) : (
           <div className="text-slate-700">Author not found.</div>
         )}
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }; 
