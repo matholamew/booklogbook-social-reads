@@ -37,6 +37,11 @@ export const AddBookButton = () => {
       setError("You must be logged in to add a book.");
       return;
     }
+    // Validation: require both dates if status is finished or did_not_finish
+    if ((formData.status === 'finished' || formData.status === 'did_not_finish') && (!formData.dateStarted || !formData.dateFinished)) {
+      setError('Both Date Started and Date Finished are required when marking a book as Read.');
+      return;
+    }
 
     try {
       // 1. Check or insert author

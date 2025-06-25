@@ -48,6 +48,8 @@ const mockBooks = [
   }
 ];
 
+type SectionType = 'reading' | 'planned' | 'finished';
+
 const Index = () => {
   const { user, loading } = useAuth();
   const { data: userBooks = [], isLoading: booksLoading } = useUserBooks();
@@ -57,9 +59,45 @@ const Index = () => {
   const [viewAllOpen, setViewAllOpen] = useState(false);
   const [viewAllPage, setViewAllPage] = useState(1);
   const [userDisplayName, setUserDisplayName] = useState('');
+  const [currentSection, setCurrentSection] = useState<SectionType>('reading');
+  const [sectionPage, setSectionPage] = useState(1);
   const booksPerPage = 10;
-  const totalPages = Math.ceil(userBooks.length / booksPerPage);
-  const paginatedBooks = userBooks.slice((viewAllPage - 1) * booksPerPage, viewAllPage * booksPerPage);
+  const booksPerSection = 6;
+
+  // Get books for each section
+  const readingBooks = userBooks.filter(book => book.status === 'reading')
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  const plannedBooks = userBooks.filter(book => book.status === 'planned')
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  const finishedBooks = userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish')
+    .sort((a, b) => {
+      // Sort by dateStarted descending (most recent first)
+      if (!a.dateStarted && !b.dateStarted) return 0;
+      if (!a.dateStarted) return 1;
+      if (!b.dateStarted) return -1;
+      return new Date(b.dateStarted).getTime() - new Date(a.dateStarted).getTime();
+    });
+
+  // Get paginated books for current section
+  const getCurrentSectionBooks = () => {
+    switch (currentSection) {
+      case 'reading':
+        return readingBooks;
+      case 'planned':
+        return plannedBooks;
+      case 'finished':
+        return finishedBooks;
+      default:
+        return [];
+    }
+  };
+
+  const currentSectionBooks = getCurrentSectionBooks();
+  const totalPages = Math.ceil(currentSectionBooks.length / booksPerPage);
+  const paginatedSectionBooks = currentSectionBooks.slice(
+    (sectionPage - 1) * booksPerPage, 
+    sectionPage * booksPerPage
+  );
 
   // Fetch user's display name when user is available
   useEffect(() => {
@@ -89,9 +127,23 @@ const Index = () => {
     setEditModalOpen(true);
   };
 
-  const handleOpenViewAll = () => {
-    setViewAllPage(1);
+  const handleOpenViewAll = (section: SectionType) => {
+    setCurrentSection(section);
+    setSectionPage(1);
     setViewAllOpen(true);
+  };
+
+  const getSectionTitle = (section: SectionType) => {
+    switch (section) {
+      case 'reading':
+        return 'Currently Reading';
+      case 'planned':
+        return 'To Be Read';
+      case 'finished':
+        return 'Read';
+      default:
+        return '';
+    }
   };
 
   if (loading) {
@@ -139,17 +191,29 @@ const Index = () => {
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="font-serif text-slate-900">Currently Reading</CardTitle>
-                    <Badge variant="secondary" className="bg-slate-200 text-slate-900 border border-slate-300">
-                      {userBooks.filter(book => book.status === 'reading').length} books
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-slate-200 text-slate-900 border border-slate-300">
+                        {readingBooks.length} books
+                      </Badge>
+                      {readingBooks.length > booksPerSection && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenViewAll('reading')}
+                          className="text-slate-700 border-slate-300 hover:bg-slate-100"
+                        >
+                          View All
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
                       <div className="text-slate-600">Loading your books...</div>
-                    ) : userBooks.filter(book => book.status === 'reading').length > 0 ? (
+                    ) : readingBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {userBooks
-                          .filter(book => book.status === 'reading')
+                        {readingBooks
+                          .slice(0, booksPerSection)
                           .map(book => (
                             <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                           ))}
@@ -164,17 +228,29 @@ const Index = () => {
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="font-serif text-slate-900">To Be Read</CardTitle>
-                    <Badge variant="secondary" className="bg-white text-slate-900 border border-slate-400">
-                      {userBooks.filter(book => book.status === 'planned').length} books
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-white text-slate-900 border border-slate-400">
+                        {plannedBooks.length} books
+                      </Badge>
+                      {plannedBooks.length > booksPerSection && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenViewAll('planned')}
+                          className="text-slate-700 border-slate-300 hover:bg-slate-100"
+                        >
+                          View All
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
                       <div className="text-slate-600">Loading your books...</div>
-                    ) : userBooks.filter(book => book.status === 'planned').length > 0 ? (
+                    ) : plannedBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {userBooks
-                          .filter(book => book.status === 'planned')
+                        {plannedBooks
+                          .slice(0, booksPerSection)
                           .map(book => (
                             <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                           ))}
@@ -189,17 +265,29 @@ const Index = () => {
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="font-serif text-slate-900">Read</CardTitle>
-                    <Badge variant="secondary" className="bg-slate-800 text-white border border-slate-800">
-                      {userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish').length} books
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="bg-slate-800 text-white border border-slate-800">
+                        {finishedBooks.length} books
+                      </Badge>
+                      {finishedBooks.length > booksPerSection && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleOpenViewAll('finished')}
+                          className="text-slate-700 border-slate-300 hover:bg-slate-100"
+                        >
+                          View All
+                        </Button>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
                       <div className="text-slate-600">Loading your books...</div>
-                    ) : userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish').length > 0 ? (
+                    ) : finishedBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {userBooks
-                          .filter(book => book.status === 'finished' || book.status === 'did_not_finish')
+                        {finishedBooks
+                          .slice(0, booksPerSection)
                           .map(book => (
                             <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
                           ))}
@@ -235,53 +323,57 @@ const Index = () => {
               </div>
             </div>
 
-            {/* View All Modal */}
+            {/* Section View All Modal */}
             <Dialog open={viewAllOpen} onOpenChange={setViewAllOpen}>
-              <DialogContent className="max-w-3xl w-full max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+              <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
                 <DialogHeader>
-                  <DialogTitle className="font-serif text-xl text-slate-900">All Books in Your Library</DialogTitle>
+                  <DialogTitle className="font-serif text-xl text-slate-900">
+                    {getSectionTitle(currentSection)} - All Books
+                  </DialogTitle>
                 </DialogHeader>
                 {booksLoading ? (
-                  <div className="text-slate-600">Loading your library...</div>
-                ) : userBooks.length > 0 ? (
+                  <div className="text-slate-600">Loading your books...</div>
+                ) : currentSectionBooks.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                      {paginatedBooks.map(book => (
+                      {paginatedSectionBooks.map(book => (
                         <BookCard key={book.id} book={book} onClick={() => { setViewAllOpen(false); handleBookClick(book); }} />
                       ))}
                     </div>
                     {/* Pagination Controls */}
-                    <div className="flex items-center justify-center gap-2 mt-2">
-                      <button
-                        className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50"
-                        onClick={() => setViewAllPage(p => Math.max(1, p - 1))}
-                        disabled={viewAllPage === 1}
-                        aria-label="Previous page"
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </button>
-                      {Array.from({ length: totalPages }, (_, i) => (
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 mt-4">
                         <button
-                          key={i + 1}
-                          className={`px-3 py-1 rounded border ${viewAllPage === i + 1 ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-300'}`}
-                          onClick={() => setViewAllPage(i + 1)}
-                          aria-label={`Go to page ${i + 1}`}
+                          className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50 hover:bg-slate-50"
+                          onClick={() => setSectionPage(p => Math.max(1, p - 1))}
+                          disabled={sectionPage === 1}
+                          aria-label="Previous page"
                         >
-                          {i + 1}
+                          <ChevronLeft className="h-4 w-4" />
                         </button>
-                      ))}
-                      <button
-                        className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50"
-                        onClick={() => setViewAllPage(p => Math.min(totalPages, p + 1))}
-                        disabled={viewAllPage === totalPages}
-                        aria-label="Next page"
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </button>
-                    </div>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <button
+                            key={i + 1}
+                            className={`px-3 py-1 rounded border ${sectionPage === i + 1 ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-300 hover:bg-slate-50'}`}
+                            onClick={() => setSectionPage(i + 1)}
+                            aria-label={`Go to page ${i + 1}`}
+                          >
+                            {i + 1}
+                          </button>
+                        ))}
+                        <button
+                          className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50 hover:bg-slate-50"
+                          onClick={() => setSectionPage(p => Math.min(totalPages, p + 1))}
+                          disabled={sectionPage === totalPages}
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
                   </>
                 ) : (
-                  <p className="text-slate-600">Your library is empty. Add your first book to get started!</p>
+                  <p className="text-slate-600">No books in this section.</p>
                 )}
               </DialogContent>
             </Dialog>
@@ -317,33 +409,29 @@ const Index = () => {
             </div>
 
             {/* Sample books preview */}
-            <Card className="mb-8 border-2 border-slate-300 bg-white">
-              <CardHeader>
-                <CardTitle className="font-serif text-slate-900">What BookLogBook looks like</CardTitle>
-                <p className="text-slate-600">Here's a preview of how you can organize your reading:</p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {mockBooks.map(book => (
-                    <BookCard key={book.id} book={book} />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold font-serif text-slate-900 mb-6">Sample Reading Journey</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {mockBooks.map(book => (
+                  <BookCard key={book.id} book={book} />
+                ))}
+              </div>
+            </div>
 
             {/* Call to action */}
-            <div className="text-center bg-slate-50 rounded-lg p-8 border-2 border-slate-300">
-              <h2 className="text-2xl font-serif text-slate-900 mb-4">Ready to start your reading journey?</h2>
-              <p className="text-slate-600 mb-6">Join thousands of readers who are already tracking their books with BookLogBook.</p>
+            <div className="text-center py-12">
+              <h2 className="text-3xl font-bold font-serif text-slate-900 mb-4">Ready to Start Your Reading Journey?</h2>
+              <p className="text-slate-700 mb-6 text-lg">Join thousands of readers who are already tracking their books with BookLogBook.</p>
               <Link to="/auth">
-                <Button size="lg" className="bg-slate-800 hover:bg-slate-900 text-white">
-                  Get Started with Email
+                <Button className="bg-slate-700 hover:bg-slate-800 text-white px-8 py-3 text-lg">
+                  Get Started Today
                 </Button>
               </Link>
             </div>
           </>
         )}
       </main>
+      
       <Footer />
     </div>
   );

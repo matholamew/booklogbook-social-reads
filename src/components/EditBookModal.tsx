@@ -82,6 +82,11 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    // Validation: require both dates if status is finished or did_not_finish
+    if ((formData.status === 'finished' || formData.status === 'did_not_finish') && (!formData.dateStarted || !formData.dateFinished)) {
+      setError('Both Date Started and Date Finished are required when marking a book as Read.');
+      return;
+    }
     setLoading(true);
     try {
       const { error: updateError } = await supabase
