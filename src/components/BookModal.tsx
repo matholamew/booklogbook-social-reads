@@ -60,13 +60,36 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
 
   // Toggle favorite
   const handleToggleFavorite = async () => {
-    if (!user || !bookId || !favoriteId) return;
+    if (!user || !bookId) return;
     setFavoriteLoading(true);
-    const { error } = await supabase
-      .from('user_books')
-      .update({ favorite: !favorite })
-      .eq('id', favoriteId);
-    if (!error) setFavorite(fav => !fav);
+    if (favoriteId) {
+      // Book is already in library, just toggle favorite
+      const { error } = await supabase
+        .from('user_books')
+        .update({ favorite: !favorite })
+        .eq('id', favoriteId);
+      if (!error) setFavorite(fav => !fav);
+    } else {
+      // Book not in library, add it as favorite
+      // Need to find the book's author id
+      const { data: bookData } = await supabase
+        .from('books')
+        .select('id, author_id')
+        .eq('id', bookId)
+        .single();
+      if (!bookData) {
+        setFavoriteLoading(false);
+        return;
+      }
+      const { error } = await supabase
+        .from('user_books')
+        .insert({
+          user_id: user.id,
+          book_id: bookId,
+          favorite: true,
+        });
+      if (!error) setFavorite(true);
+    }
     setFavoriteLoading(false);
   };
 
@@ -78,7 +101,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900 flex items-center gap-2">
             Book
-            {user && favoriteId && (
+            {user && (
               <Button
                 type="button"
                 variant="ghost"
