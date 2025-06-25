@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
 import { toggleFavoriteBook } from '@/lib/favorite';
+import { toast } from '@/hooks/use-toast';
 
 interface BookModalProps {
   open: boolean;
@@ -40,20 +41,30 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
 
   // Fetch favorite status for this user/book
   const fetchFavoriteStatus = async () => {
-    if (open && bookId && user) {
-      setFavoriteLoading(true);
-      const { data } = await supabase
-        .from('user_books')
-        .select('id, favorite')
-        .eq('user_id', user.id)
-        .eq('book_id', bookId)
-        .maybeSingle();
-      setFavorite(!!data?.favorite);
-      setFavoriteId(data?.id || null);
-      setFavoriteLoading(false);
-    } else {
-      setFavorite(false);
-      setFavoriteId(null);
+    try {
+      if (open && bookId && user) {
+        setFavoriteLoading(true);
+        const { data, error } = await supabase
+          .from('user_books')
+          .select('id, favorite')
+          .eq('user_id', user.id)
+          .eq('book_id', bookId)
+          .maybeSingle();
+        if (error) {
+          console.error('Fetch favorite error:', error);
+          toast({ title: 'Error', description: 'Failed to fetch favorite status.' });
+        }
+        setFavorite(!!data?.favorite);
+        setFavoriteId(data?.id || null);
+        setFavoriteLoading(false);
+        console.log('Fetched favorite:', data);
+      } else {
+        setFavorite(false);
+        setFavoriteId(null);
+      }
+    } catch (err) {
+      console.error('Fetch favorite exception:', err);
+      toast({ title: 'Error', description: 'Exception fetching favorite status.' });
     }
   };
 
@@ -66,12 +77,27 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   const handleToggleFavorite = async () => {
     if (!user || !bookId) return;
     setFavoriteLoading(true);
-    const result = await toggleFavoriteBook({
-      userId: user.id,
-      bookId,
-      currentFavorite: favorite,
-    });
-    await fetchFavoriteStatus();
+    try {
+      const result = await toggleFavoriteBook({
+        userId: user.id,
+        bookId,
+        currentFavorite: favorite,
+      });
+      console.log('Toggle favorite result:', result);
+      if (result === 'favorited') {
+        toast({ title: 'Book Favorited', description: 'Book added to your favorites.' });
+      } else if (result === 'unfavorited') {
+        toast({ title: 'Book Unfavorited', description: 'Book removed from your favorites.' });
+      } else if (result === 'removed') {
+        toast({ title: 'Book Removed', description: 'Book removed from your reading list.' });
+      } else {
+        toast({ title: 'Error', description: 'Failed to update favorite status.' });
+      }
+      await fetchFavoriteStatus();
+    } catch (err) {
+      console.error('Toggle favorite exception:', err);
+      toast({ title: 'Error', description: 'Exception toggling favorite status.' });
+    }
     setFavoriteLoading(false);
   };
 
