@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
+import { toggleFavoriteBook } from '@/lib/favorite';
 
 interface BookModalProps {
   open: boolean;
@@ -62,34 +63,13 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   const handleToggleFavorite = async () => {
     if (!user || !bookId) return;
     setFavoriteLoading(true);
-    if (favoriteId) {
-      // Book is already in library, just toggle favorite
-      const { error } = await supabase
-        .from('user_books')
-        .update({ favorite: !favorite })
-        .eq('id', favoriteId);
-      if (!error) setFavorite(fav => !fav);
-    } else {
-      // Book not in library, add it as favorite
-      // Need to find the book's author id
-      const { data: bookData } = await supabase
-        .from('books')
-        .select('id, author_id')
-        .eq('id', bookId)
-        .single();
-      if (!bookData) {
-        setFavoriteLoading(false);
-        return;
-      }
-      const { error } = await supabase
-        .from('user_books')
-        .insert({
-          user_id: user.id,
-          book_id: bookId,
-          favorite: true,
-        });
-      if (!error) setFavorite(true);
-    }
+    const result = await toggleFavoriteBook({
+      userId: user.id,
+      bookId,
+      currentFavorite: favorite,
+    });
+    if (result === 'favorited') setFavorite(true);
+    else if (result === 'unfavorited' || result === 'removed') setFavorite(false);
     setFavoriteLoading(false);
   };
 

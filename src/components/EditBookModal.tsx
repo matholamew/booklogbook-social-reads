@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
+import { toggleFavoriteBook } from '@/lib/favorite';
 
 interface EditBookModalProps {
   open: boolean;
@@ -140,45 +141,13 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const handleToggleFavorite = async () => {
     if (!user || !book.id) return;
     setFavoriteLoading(true);
-    // Find the user_books row for this user/book
-    const { data } = await supabase
-      .from('user_books')
-      .select('id, favorite')
-      .eq('user_id', user.id)
-      .eq('book_id', book.id)
-      .maybeSingle();
-    if (data && data.id) {
-      // Row exists, update favorite
-      const { error } = await supabase
-        .from('user_books')
-        .update({ favorite: !favorite })
-        .eq('id', data.id);
-      if (!error) setFavorite(fav => !fav);
-    } else {
-      // Row does not exist, need to insert
-      // Find the book's author_id
-      const { data: bookData } = await supabase
-        .from('books')
-        .select('id, author_id')
-        .eq('id', book.id)
-        .single();
-      if (!bookData) {
-        setFavoriteLoading(false);
-        return;
-      }
-      const { error } = await supabase
-        .from('user_books')
-        .insert({
-          user_id: user.id,
-          book_id: book.id,
-          favorite: true,
-          status: formData.status,
-          date_started: formData.dateStarted || null,
-          date_finished: formData.dateFinished || null,
-          notes: formData.notes || null,
-        });
-      if (!error) setFavorite(true);
-    }
+    const result = await toggleFavoriteBook({
+      userId: user.id,
+      bookId: book.id,
+      currentFavorite: favorite,
+    });
+    if (result === 'favorited') setFavorite(true);
+    else if (result === 'unfavorited' || result === 'removed') setFavorite(false);
     setFavoriteLoading(false);
   };
 
