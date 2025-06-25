@@ -1,7 +1,6 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useEffect } from 'react';
 
 export interface Book {
   id: string;
@@ -17,28 +16,6 @@ export interface Book {
 
 export const useUserBooks = () => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (!user) return;
-    // Subscribe to user_books, books, and authors changes
-    const channels = [
-      supabase.channel('user_books-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'user_books' }, () => {
-          queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
-        }),
-      supabase.channel('books-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'books' }, () => {
-          queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
-        }),
-      supabase.channel('authors-changes')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'authors' }, () => {
-          queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
-        })
-    ];
-    channels.forEach(channel => channel.subscribe());
-    return () => { channels.forEach(channel => channel.unsubscribe()); };
-  }, [user, queryClient]);
 
   return useQuery({
     queryKey: ['user-books', user?.id],
