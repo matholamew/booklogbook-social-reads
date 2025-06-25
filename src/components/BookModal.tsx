@@ -168,6 +168,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         });
       if (insertError) throw insertError;
       toast({ title: 'Book Added', description: 'Book added to your "To Be Read" list.' });
+      onClose();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to add book to library.' });
     }
