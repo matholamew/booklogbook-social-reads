@@ -133,7 +133,7 @@ const Index = () => {
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Current Reading & Recent Books */}
+              {/* Left Column - Book Sections */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Currently Reading */}
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
@@ -160,25 +160,52 @@ const Index = () => {
                   </CardContent>
                 </Card>
 
-                {/* Recent Books */}
+                {/* To Be Read */}
                 <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="font-serif text-slate-900">Your Library</CardTitle>
-                    <Button variant="outline" size="sm" onClick={handleOpenViewAll}>
-                      View All
-                    </Button>
+                    <CardTitle className="font-serif text-slate-900">To Be Read</CardTitle>
+                    <Badge variant="secondary" className="bg-white text-slate-900 border border-slate-400">
+                      {userBooks.filter(book => book.status === 'planned').length} books
+                    </Badge>
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
-                      <div className="text-slate-600">Loading your library...</div>
-                    ) : userBooks.length > 0 ? (
+                      <div className="text-slate-600">Loading your books...</div>
+                    ) : userBooks.filter(book => book.status === 'planned').length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {userBooks.slice(0, 6).map(book => (
-                          <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
-                        ))}
+                        {userBooks
+                          .filter(book => book.status === 'planned')
+                          .map(book => (
+                            <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
+                          ))}
                       </div>
                     ) : (
-                      <p className="text-slate-600">Your library is empty. Add your first book to get started!</p>
+                      <p className="text-slate-600">No books in your reading list. Add some books you want to read!</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Read */}
+                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="font-serif text-slate-900">Read</CardTitle>
+                    <Badge variant="secondary" className="bg-slate-800 text-white border border-slate-800">
+                      {userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish').length} books
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    {booksLoading ? (
+                      <div className="text-slate-600">Loading your books...</div>
+                    ) : userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish').length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {userBooks
+                          .filter(book => book.status === 'finished' || book.status === 'did_not_finish')
+                          .map(book => (
+                            <BookCard key={book.id} book={book} onClick={() => handleBookClick(book)} />
+                          ))}
+                      </div>
+                    ) : (
+                      <p className="text-slate-600">No books completed yet. Keep reading!</p>
                     )}
                   </CardContent>
                 </Card>

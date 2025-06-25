@@ -7,7 +7,7 @@ export interface Book {
   id: string;
   title: string;
   author: string;
-  status: 'reading' | 'finished' | 'planned';
+  status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
   dateStarted?: string;
   dateFinished?: string;
   notes: string;
