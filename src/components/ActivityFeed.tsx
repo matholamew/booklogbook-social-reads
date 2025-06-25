@@ -19,7 +19,9 @@ export const ActivityFeed = () => {
         .select('following_id')
         .eq('follower_id', user.id);
       if (followsError) throw followsError;
-      const friendIds = follows?.map(f => f.following_id) || [];
+      let friendIds = follows?.map(f => f.following_id) || [];
+      // Exclude the current user's own ID if present
+      friendIds = friendIds.filter(id => id !== user.id);
 
       if (friendIds.length === 0) return [];
 

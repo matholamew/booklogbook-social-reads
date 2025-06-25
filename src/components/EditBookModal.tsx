@@ -179,6 +179,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         description: `${book.title} has been updated.`
       });
       queryClient.invalidateQueries({ queryKey: ['user-books', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['activity-feed', user?.id] });
       onOpenChange(false);
       queryClient.invalidateQueries(); // fallback: invalidate all queries for extra reliability
     } catch (err: any) {
