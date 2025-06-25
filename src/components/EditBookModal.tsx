@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { Star, StarOff } from 'lucide-react';
 
 interface EditBookModalProps {
   open: boolean;
@@ -24,6 +26,7 @@ interface EditBookModalProps {
 }
 
 export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     status: book.status,
     dateStarted: book.dateStarted || '',
@@ -33,6 +36,8 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
+  const [favorite, setFavorite] = useState<boolean>(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const queryClient = useQueryClient();
 
   const statusOptions = [
@@ -79,6 +84,26 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, book.id]);
 
+  useEffect(() => {
+    const fetchFavorite = async () => {
+      if (open && book.id && user) {
+        setFavoriteLoading(true);
+        const { data } = await supabase
+          .from('user_books')
+          .select('favorite')
+          .eq('user_id', user.id)
+          .eq('book_id', book.id)
+          .maybeSingle();
+        setFavorite(!!data?.favorite);
+        setFavoriteLoading(false);
+      } else {
+        setFavorite(false);
+      }
+    };
+    fetchFavorite();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, book.id, user]);
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -112,11 +137,47 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     }
   };
 
+  const handleToggleFavorite = async () => {
+    if (!user || !book.id) return;
+    setFavoriteLoading(true);
+    // Find the user_books row for this user/book
+    const { data } = await supabase
+      .from('user_books')
+      .select('id, favorite')
+      .eq('user_id', user.id)
+      .eq('book_id', book.id)
+      .maybeSingle();
+    if (data && data.id) {
+      // Row exists, update favorite
+      const { error } = await supabase
+        .from('user_books')
+        .update({ favorite: !favorite })
+        .eq('id', data.id);
+      if (!error) setFavorite(fav => !fav);
+    }
+    setFavoriteLoading(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl text-slate-900">Edit Book</DialogTitle>
+          <DialogTitle className="font-serif text-xl text-slate-900 flex items-center gap-2">
+            Edit Book
+            {user && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="ml-2"
+                onClick={handleToggleFavorite}
+                disabled={favoriteLoading}
+                aria-label={favorite ? 'Unfavorite' : 'Favorite'}
+              >
+                {favorite ? <Star className="text-yellow-400 fill-yellow-400" /> : <StarOff className="text-slate-400" />}
+              </Button>
+            )}
+          </DialogTitle>
         </DialogHeader>
         {fetching ? (
           <div className="p-8 text-center text-slate-600">Loading latest book data...</div>
