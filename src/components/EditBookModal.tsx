@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,7 +39,9 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const [fetching, setFetching] = useState(false);
   const [favorite, setFavorite] = useState<boolean>(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [userBookId, setUserBookId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const subscriptionRef = useRef<any>(null);
 
   const statusOptions = [
     { value: 'planned', label: 'To Be Read' },
@@ -58,64 +60,99 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     }
   };
 
-  useEffect(() => {
-    const fetchBook = async () => {
-      setFetching(true);
-      setError('');
-      const { data, error: fetchError } = await supabase
-        .from('user_books')
-        .select('status, date_started, date_finished, notes')
-        .eq('id', book.id)
-        .single();
-      if (fetchError) {
-        setError('Failed to fetch latest book data.');
-      } else if (data) {
-        setFormData({
-          status: data.status,
-          dateStarted: data.date_started || '',
-          dateFinished: data.date_finished || '',
-          notes: data.notes || '',
-        });
-      }
-      setFetching(false);
-    };
-    if (open) {
-      fetchBook();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, book.id]);
+  // Helper to resolve the real book id (by id or by title/author)
+  const resolveBookId = async () => {
+    // Try by id
+    let { data: bookData, error: bookFetchError } = await supabase
+      .from('books')
+      .select('id, author_id')
+      .eq('id', book.id)
+      .maybeSingle();
+    if (bookFetchError) return null;
+    if (bookData) return bookData.id;
+    // Try by title/author
+    if (!book.title || !book.author) return null;
+    // Find author id
+    const { data: authorData } = await supabase
+      .from('authors')
+      .select('id')
+      .eq('name', book.author)
+      .maybeSingle();
+    if (!authorData) return null;
+    const { data: bookByTitle } = await supabase
+      .from('books')
+      .select('id')
+      .eq('title', book.title)
+      .eq('author_id', authorData.id)
+      .maybeSingle();
+    return bookByTitle?.id || null;
+  };
 
   // Fetch favorite status for this user/book
   const fetchFavoriteStatus = async () => {
-    try {
-      if (open && book.id && user) {
-        setFavoriteLoading(true);
-        const { data, error } = await supabase
-          .from('user_books')
-          .select('favorite')
-          .eq('user_id', user.id)
-          .eq('book_id', book.id)
-          .maybeSingle();
-        if (error) {
-          console.error('Fetch favorite error:', error);
-          toast({ title: 'Error', description: 'Failed to fetch favorite status.' });
-        }
-        setFavorite(!!data?.favorite);
-        setFavoriteLoading(false);
-        console.log('Fetched favorite:', data);
-      } else {
-        setFavorite(false);
-      }
-    } catch (err) {
-      console.error('Fetch favorite exception:', err);
-      toast({ title: 'Error', description: 'Exception fetching favorite status.' });
+    if (!open || !user) return;
+    setFavoriteLoading(true);
+    const realBookId = await resolveBookId();
+    if (!realBookId) {
+      setFavorite(false);
+      setUserBookId(null);
+      setFavoriteLoading(false);
+      return;
     }
+    const { data: userBook, error } = await supabase
+      .from('user_books')
+      .select('id, favorite')
+      .eq('user_id', user.id)
+      .eq('book_id', realBookId)
+      .maybeSingle();
+    if (error) {
+      setFavorite(false);
+      setUserBookId(null);
+    } else {
+      setFavorite(!!userBook?.favorite);
+      setUserBookId(userBook?.id || null);
+    }
+    setFavoriteLoading(false);
   };
 
+  // Subscribe to real-time updates for this user/book
   useEffect(() => {
-    fetchFavoriteStatus();
+    if (!open || !user) return;
+    let sub: any;
+    (async () => {
+      const realBookId = await resolveBookId();
+      if (!realBookId) return;
+      sub = supabase
+        .channel('user_books_favorite_realtime')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_books',
+            filter: `user_id=eq.${user.id},book_id=eq.${realBookId}`,
+          },
+          (payload) => {
+            // Refetch favorite status on any change
+            fetchFavoriteStatus();
+          }
+        )
+        .subscribe();
+      subscriptionRef.current = sub;
+    })();
+    return () => {
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current);
+        subscriptionRef.current = null;
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, book.id, user]);
+  }, [open, book.id, book.title, book.author, user]);
+
+  useEffect(() => {
+    if (open) fetchFavoriteStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, book.id, book.title, book.author, user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,7 +198,6 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         bookTitle: book.title,
         bookAuthor: book.author,
       });
-      console.log('Toggle favorite result:', result, errorMessage);
       if (result === 'favorited') {
         toast({ title: 'Book Favorited', description: 'Book added to your favorites.' });
       } else if (result === 'unfavorited') {
