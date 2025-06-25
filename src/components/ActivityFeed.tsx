@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Book, Calendar } from 'lucide-react';
+import { Book, Calendar, User, Edit } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -12,6 +12,7 @@ export const ActivityFeed = () => {
     queryKey: ['activity-feed', user?.id],
     queryFn: async () => {
       if (!user) return [];
+      
       // 1. Get friend IDs
       const { data: follows, error: followsError } = await supabase
         .from('user_follows')
@@ -19,24 +20,24 @@ export const ActivityFeed = () => {
         .eq('follower_id', user.id);
       if (followsError) throw followsError;
       const friendIds = follows?.map(f => f.following_id) || [];
-      // Optionally include the user's own activity
+      // Include the user's own activity
       friendIds.push(user.id);
-      // 2. Get recent activities for friends (and self)
-      const { data: activitiesData, error: activitiesError } = await supabase
-        .from('activities')
+
+      if (friendIds.length === 0) return [];
+
+      // 2. Get recent book activities from user_books
+      const { data: bookActivities, error: bookError } = await supabase
+        .from('user_books')
         .select(`
           id,
-          activity_type,
-          created_at,
-          note,
-          user_id,
-          user_books (
-            id,
-            status,
-            books (
-              title,
-              authors (name)
-            )
+          status,
+          date_started,
+          date_finished,
+          notes,
+          updated_at,
+          books (
+            title,
+            authors (name)
           ),
           profiles:profiles!user_id (
             display_name,
@@ -45,43 +46,103 @@ export const ActivityFeed = () => {
           )
         `)
         .in('user_id', friendIds)
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
         .limit(20);
-      if (activitiesError) throw activitiesError;
-      // Transform for display
-      return (activitiesData || []).map((a: any) => ({
-        id: a.id,
-        userName: a.profiles?.display_name || a.profiles?.username || 'Unknown',
-        userInitials: (a.profiles?.display_name || a.profiles?.username || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2),
-        avatarUrl: a.profiles?.avatar_url || '',
-        action: a.activity_type,
-        bookTitle: a.user_books?.books?.title || 'Unknown Title',
-        bookAuthor: a.user_books?.books?.authors?.name || 'Unknown Author',
-        timestamp: new Date(a.created_at).toLocaleString(),
-        note: a.note || ''
-      }));
+
+      if (bookError) throw bookError;
+
+      // 3. Get recent profile updates
+      const { data: profileActivities, error: profileError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          display_name,
+          username,
+          avatar_url,
+          bio,
+          updated_at
+        `)
+        .in('id', friendIds)
+        .order('updated_at', { ascending: false })
+        .limit(10);
+
+      if (profileError) throw profileError;
+
+      // 4. Combine and sort all activities by updated_at
+      const allActivities = [
+        ...(bookActivities || []).map((activity: any) => ({
+          id: `book-${activity.id}`,
+          type: 'book',
+          data: activity,
+          updated_at: activity.updated_at,
+          user: activity.profiles
+        })),
+        ...(profileActivities || []).map((activity: any) => ({
+          id: `profile-${activity.id}`,
+          type: 'profile',
+          data: activity,
+          updated_at: activity.updated_at,
+          user: activity
+        }))
+      ];
+
+      // Sort by updated_at and take top 10
+      return allActivities
+        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+        .slice(0, 10)
+        .map((activity: any) => {
+          if (activity.type === 'book') {
+            return {
+              id: activity.id,
+              userName: activity.user?.display_name || activity.user?.username || 'Unknown',
+              userInitials: (activity.user?.display_name || activity.user?.username || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2),
+              avatarUrl: activity.user?.avatar_url || '',
+              action: getBookAction(activity.data),
+              bookTitle: activity.data.books?.title || 'Unknown Title',
+              bookAuthor: activity.data.books?.authors?.name || 'Unknown Author',
+              timestamp: new Date(activity.updated_at).toLocaleString(),
+              note: activity.data.notes || '',
+              type: 'book'
+            };
+          } else {
+            return {
+              id: activity.id,
+              userName: activity.user?.display_name || activity.user?.username || 'Unknown',
+              userInitials: (activity.user?.display_name || activity.user?.username || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2),
+              avatarUrl: activity.user?.avatar_url || '',
+              action: 'updated their profile',
+              bookTitle: '',
+              bookAuthor: '',
+              timestamp: new Date(activity.updated_at).toLocaleString(),
+              note: '',
+              type: 'profile'
+            };
+          }
+        });
     },
     enabled: !!user,
     refetchOnWindowFocus: true,
   });
 
-  const getActionText = (action: string) => {
-    switch (action) {
-      case 'started': return 'started reading';
-      case 'finished': return 'finished reading';
-      case 'noted': return 'added a note to';
-      case 'added': return 'added';
-      default: return action;
-    }
+  const getBookAction = (bookData: any) => {
+    if (bookData.status === 'reading') return 'started reading';
+    if (bookData.status === 'finished') return 'finished reading';
+    if (bookData.status === 'did_not_finish') return 'stopped reading';
+    if (bookData.notes) return 'added a note to';
+    if (bookData.status === 'planned') return 'added to their reading list';
+    return 'updated';
   };
 
-  const getActionIcon = (action: string) => {
-    switch (action) {
-      case 'started': return <Book className="h-4 w-4 text-slate-700" />;
-      case 'finished': return <Book className="h-4 w-4 text-slate-900" />;
-      case 'noted': return <Calendar className="h-4 w-4 text-slate-700" />;
-      case 'added': return <Book className="h-4 w-4 text-slate-500" />;
-      default: return <Book className="h-4 w-4 text-slate-600" />;
+  const getActionIcon = (activity: any) => {
+    if (activity.type === 'profile') return <User className="h-4 w-4 text-slate-600" />;
+    
+    switch (activity.action) {
+      case 'started reading': return <Book className="h-4 w-4 text-slate-700" />;
+      case 'finished reading': return <Book className="h-4 w-4 text-slate-900" />;
+      case 'stopped reading': return <Book className="h-4 w-4 text-red-600" />;
+      case 'added a note to': return <Calendar className="h-4 w-4 text-slate-700" />;
+      case 'added to their reading list': return <Book className="h-4 w-4 text-slate-500" />;
+      default: return <Edit className="h-4 w-4 text-slate-600" />;
     }
   };
 
@@ -109,12 +170,16 @@ export const ActivityFeed = () => {
             </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                {getActionIcon(activity.action)}
+                {getActionIcon(activity)}
                 <p className="text-sm text-slate-900">
                   <span className="font-semibold">{activity.userName}</span>
-                  <span className="text-slate-700"> {getActionText(activity.action)} </span>
-                  <span className="font-semibold font-serif">{activity.bookTitle}</span>
-                  <span className="text-slate-700"> by {activity.bookAuthor}</span>
+                  <span className="text-slate-700"> {activity.action}</span>
+                  {activity.bookTitle && (
+                    <>
+                      <span className="font-semibold font-serif"> {activity.bookTitle}</span>
+                      {activity.bookAuthor && <span className="text-slate-700"> by {activity.bookAuthor}</span>}
+                    </>
+                  )}
                 </p>
               </div>
               {activity.note && (
