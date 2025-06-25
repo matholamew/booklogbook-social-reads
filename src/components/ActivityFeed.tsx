@@ -20,8 +20,6 @@ export const ActivityFeed = () => {
         .eq('follower_id', user.id);
       if (followsError) throw followsError;
       const friendIds = follows?.map(f => f.following_id) || [];
-      // Include the user's own activity
-      friendIds.push(user.id);
 
       if (friendIds.length === 0) return [];
 
