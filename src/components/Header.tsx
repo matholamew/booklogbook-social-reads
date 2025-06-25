@@ -144,15 +144,15 @@ export const Header = () => {
           {/* Logo */}
           <div className="flex items-center gap-2 text-primary font-bold text-xl flex-shrink-0">
             <Book className="h-6 w-6" />
-            <span className="hidden xs:inline sm:block font-serif text-slate-900">BookLogBook</span>
+            <span className="font-serif text-slate-900">BookLogBook</span>
           </div>
 
           {/* Search */}
-          <div className="flex-1 min-w-0 max-w-xs sm:max-w-md relative mx-2">
+          <div className="w-24 sm:flex-1 sm:min-w-0 sm:max-w-md relative mx-2 flex-shrink">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 h-4 w-4" />
             <Input
               ref={searchInputRef}
-              placeholder="Search books, authors, or friends..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white border-2 border-slate-300 focus:bg-white focus:border-slate-800 transition-colors text-slate-900 placeholder:text-slate-600 w-full"
