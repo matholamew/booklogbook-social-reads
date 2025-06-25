@@ -1,4 +1,4 @@
-import { Calendar, User as UserIcon } from 'lucide-react';
+import { Calendar, User as UserIcon, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
@@ -10,6 +10,7 @@ interface Book {
   dateFinished?: string;
   notes?: string;
   status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
+  favorite?: boolean;
 }
 
 interface BookCardProps {
@@ -59,6 +60,9 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
           <Badge className={`${getStatusColor(book.status)} transition-all duration-200 font-medium text-xs`}>
             {getStatusText(book.status)}
           </Badge>
+          {book.favorite && (
+            <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 ml-2" />
+          )}
         </div>
         
         <h3 className="font-semibold text-lg text-slate-900 mb-1 line-clamp-2 font-serif">
