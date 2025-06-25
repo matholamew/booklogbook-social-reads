@@ -37,10 +37,10 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'reading': return 'Currently reading';
+      case 'reading': return 'Currently Reading';
       case 'finished': return 'Finished';
-      case 'planned': return 'To be read';
-      case 'did_not_finish': return 'Did not finish';
+      case 'planned': return 'To Be Read';
+      case 'did_not_finish': return 'Did Not Finish';
       default: return status;
     }
   };
