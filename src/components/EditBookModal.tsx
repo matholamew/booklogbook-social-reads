@@ -178,8 +178,9 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         title: 'Book updated!',
         description: `${book.title} has been updated.`
       });
+      queryClient.invalidateQueries({ queryKey: ['user-books', user?.id] });
       onOpenChange(false);
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries(); // fallback: invalidate all queries for extra reliability
     } catch (err: any) {
       setError(err.message || 'An error occurred while updating the book.');
     } finally {

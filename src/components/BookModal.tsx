@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
 import { toggleFavoriteBook } from '@/lib/favorite';
 import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface BookModalProps {
   open: boolean;
@@ -21,6 +22,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   const [favorite, setFavorite] = useState<boolean>(false);
   const [favoriteId, setFavoriteId] = useState<string | null>(null);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch book info
   useEffect(() => {
@@ -156,6 +158,8 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
       if (userBookFetchError) throw userBookFetchError;
       if (userBook && userBook.id) {
         toast({ title: 'Already in Library', description: 'This book is already in your reading list.' });
+        queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+        onClose();
         return;
       }
       const { error: insertError } = await supabase
@@ -168,6 +172,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         });
       if (insertError) throw insertError;
       toast({ title: 'Book Added', description: 'Book added to your "To Be Read" list.' });
+      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
       onClose();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to add book to library.' });
