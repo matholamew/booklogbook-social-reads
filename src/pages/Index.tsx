@@ -12,9 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Book, Users, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { EditBookModal } from '@/components/EditBookModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Footer from '@/components/Footer';
+import { supabase } from '@/integrations/supabase/client';
 
 // Mock data for unauthenticated users
 const mockBooks = [
@@ -55,9 +56,33 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState(null);
   const [viewAllOpen, setViewAllOpen] = useState(false);
   const [viewAllPage, setViewAllPage] = useState(1);
+  const [userDisplayName, setUserDisplayName] = useState('');
   const booksPerPage = 10;
   const totalPages = Math.ceil(userBooks.length / booksPerPage);
   const paginatedBooks = userBooks.slice((viewAllPage - 1) * booksPerPage, viewAllPage * booksPerPage);
+
+  // Fetch user's display name when user is available
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) {
+        setUserDisplayName('');
+        return;
+      }
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name, username')
+          .eq('id', user.id)
+          .single();
+        if (error) throw error;
+        setUserDisplayName(data?.display_name || data?.username || user.email?.split('@')[0] || 'Reader');
+      } catch (err) {
+        console.error('Error fetching user profile:', err);
+        setUserDisplayName(user.email?.split('@')[0] || 'Reader');
+      }
+    };
+    fetchUserProfile();
+  }, [user]);
 
   const handleBookClick = (book) => {
     setSelectedBook(book);
@@ -85,7 +110,7 @@ const Index = () => {
         {/* Welcome Section */}
         <div className="mb-8 pt-4 md:pt-6 lg:pt-[24px]">
           <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">
-            {user ? `Welcome back, Reader! 📚` : 'Track Your Reading Journey 📚'}
+            {user ? `Welcome back, ${userDisplayName}! 📚` : 'Track Your Reading Journey 📚'}
           </h1>
           <p className="text-slate-800 text-lg">
             {user 
