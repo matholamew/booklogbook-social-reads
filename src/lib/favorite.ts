@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
  * @param userId - The user's ID
  * @param bookId - The book's ID
  * @param currentFavorite - Current favorite status (true/false)
- * @returns {Promise<'favorited' | 'unfavorited' | 'removed' | 'error'>}
+ * @returns {Promise<{result: 'favorited' | 'unfavorited' | 'removed' | 'error', errorMessage?: string}>}
  */
 export async function toggleFavoriteBook({
   userId,
@@ -16,7 +16,7 @@ export async function toggleFavoriteBook({
   userId: string;
   bookId: string;
   currentFavorite: boolean;
-}): Promise<'favorited' | 'unfavorited' | 'removed' | 'error'> {
+}): Promise<{result: 'favorited' | 'unfavorited' | 'removed' | 'error', errorMessage?: string}> {
   // Find the user_books row for this user/book
   const { data: userBook, error: fetchError } = await supabase
     .from('user_books')
@@ -24,7 +24,10 @@ export async function toggleFavoriteBook({
     .eq('user_id', userId)
     .eq('book_id', bookId)
     .maybeSingle();
-  if (fetchError) return 'error';
+  if (fetchError) {
+    console.error('toggleFavoriteBook fetch error:', fetchError);
+    return { result: 'error', errorMessage: fetchError.message };
+  }
 
   if (!userBook) {
     // Not in list: add as planned + favorite
@@ -36,7 +39,11 @@ export async function toggleFavoriteBook({
         status: 'planned',
         favorite: true,
       });
-    return insertError ? 'error' : 'favorited';
+    if (insertError) {
+      console.error('toggleFavoriteBook insert error:', insertError);
+      return { result: 'error', errorMessage: insertError.message };
+    }
+    return { result: 'favorited' };
   }
 
   if (!currentFavorite) {
@@ -45,7 +52,11 @@ export async function toggleFavoriteBook({
       .from('user_books')
       .update({ favorite: true })
       .eq('id', userBook.id);
-    return updateError ? 'error' : 'favorited';
+    if (updateError) {
+      console.error('toggleFavoriteBook update error:', updateError);
+      return { result: 'error', errorMessage: updateError.message };
+    }
+    return { result: 'favorited' };
   }
 
   // Unfavoriting
@@ -55,13 +66,21 @@ export async function toggleFavoriteBook({
       .from('user_books')
       .delete()
       .eq('id', userBook.id);
-    return deleteError ? 'error' : 'removed';
+    if (deleteError) {
+      console.error('toggleFavoriteBook delete error:', deleteError);
+      return { result: 'error', errorMessage: deleteError.message };
+    }
+    return { result: 'removed' };
   } else {
     // Otherwise, just set favorite false
     const { error: updateError } = await supabase
       .from('user_books')
       .update({ favorite: false })
       .eq('id', userBook.id);
-    return updateError ? 'error' : 'unfavorited';
+    if (updateError) {
+      console.error('toggleFavoriteBook update error:', updateError);
+      return { result: 'error', errorMessage: updateError.message };
+    }
+    return { result: 'unfavorited' };
   }
 } 

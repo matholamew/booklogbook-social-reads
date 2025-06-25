@@ -154,12 +154,12 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     if (!user || !book.id) return;
     setFavoriteLoading(true);
     try {
-      const result = await toggleFavoriteBook({
+      const { result, errorMessage } = await toggleFavoriteBook({
         userId: user.id,
         bookId: book.id,
         currentFavorite: favorite,
       });
-      console.log('Toggle favorite result:', result);
+      console.log('Toggle favorite result:', result, errorMessage);
       if (result === 'favorited') {
         toast({ title: 'Book Favorited', description: 'Book added to your favorites.' });
       } else if (result === 'unfavorited') {
@@ -167,7 +167,8 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       } else if (result === 'removed') {
         toast({ title: 'Book Removed', description: 'Book removed from your reading list.' });
       } else {
-        toast({ title: 'Error', description: 'Failed to update favorite status.' });
+        toast({ title: 'Error', description: errorMessage || 'Failed to update favorite status.' });
+        if (errorMessage) console.error('Supabase error:', errorMessage);
       }
       await fetchFavoriteStatus();
     } catch (err) {
