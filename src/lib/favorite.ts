@@ -37,26 +37,26 @@ export async function toggleFavoriteBook({
 
   // If not in user_books, ensure book exists in books table
   if (!userBook) {
-    // Check if book exists in books table
+    // Check if book exists in books table by id
     const { data: bookData, error: bookFetchError } = await supabase
       .from('books')
-      .select('id')
+      .select('id, author_id')
       .eq('id', bookId)
       .maybeSingle();
     let realBookId = bookId;
+    let authorId: string | undefined;
     if (bookFetchError) {
       console.error('toggleFavoriteBook book fetch error:', bookFetchError);
       return { result: 'error', errorMessage: bookFetchError.message };
     }
     if (!bookData) {
-      // Need to create the book
+      // Need to create or find the book by title/author
       if (!bookTitle || !bookAuthor) {
         const msg = 'Book details missing. Cannot favorite.';
         console.error(msg);
         return { result: 'error', errorMessage: msg };
       }
       // Check or insert author
-      let authorId: string | undefined;
       const { data: authorData, error: authorFetchError } = await supabase
         .from('authors')
         .select('id')
@@ -81,17 +81,35 @@ export async function toggleFavoriteBook({
         }
         authorId = newAuthor.id;
       }
-      // Insert book
-      const { data: newBook, error: bookInsertError } = await supabase
+      // Now, try to find the book by title and author_id
+      const { data: bookByTitle, error: bookByTitleError } = await supabase
         .from('books')
-        .insert({ title: bookTitle, author_id: authorId })
         .select('id')
-        .single();
-      if (bookInsertError) {
-        console.error('toggleFavoriteBook book insert error:', bookInsertError);
-        return { result: 'error', errorMessage: bookInsertError.message };
+        .eq('title', bookTitle)
+        .eq('author_id', authorId)
+        .maybeSingle();
+      if (bookByTitleError) {
+        console.error('toggleFavoriteBook bookByTitle fetch error:', bookByTitleError);
+        return { result: 'error', errorMessage: bookByTitleError.message };
       }
-      realBookId = newBook.id;
+      if (bookByTitle && bookByTitle.id) {
+        realBookId = bookByTitle.id;
+      } else {
+        // Insert book
+        const { data: newBook, error: bookInsertError } = await supabase
+          .from('books')
+          .insert({ title: bookTitle, author_id: authorId })
+          .select('id')
+          .single();
+        if (bookInsertError) {
+          console.error('toggleFavoriteBook book insert error:', bookInsertError);
+          return { result: 'error', errorMessage: bookInsertError.message };
+        }
+        realBookId = newBook.id;
+      }
+    } else {
+      // Book found by id, use its author_id
+      authorId = bookData.author_id;
     }
     // Insert into user_books
     const { error: insertError } = await supabase
