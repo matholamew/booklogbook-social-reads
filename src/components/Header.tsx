@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Book, User, LogOut } from 'lucide-react';
+import { Book, Search, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,17 +16,6 @@ import { BookModal } from '@/components/BookModal';
 import { AuthorModal } from '@/components/AuthorModal';
 import { FriendModal } from '@/components/FriendModal';
 import { toast } from '@/hooks/use-toast';
-import { LottieAnimation } from '@/components/ui/lottie-animation';
-import { useAnimation } from '@/hooks/useAnimation';
-
-// Import animation data
-const searchAnimation = {
-  "v":"5.7.4","fr":60,"ip":0,"op":120,"w":100,"h":100,"nm":"Search","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"Search","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[50,50,0],"ix":2,"l":2},"a":{"a":0,"k":[0,0,0],"ix":1,"l":2},"s":{"a":0,"k":[100,100,100],"ix":6,"l":2}},"ao":0,"shapes":[{"ty":"gr","it":[{"d":1,"ty":"el","s":{"a":0,"k":[40,40],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"nm":"Ellipse Path 1","mn":"ADBE Vector Shape - Ellipse","hd":false},{"ty":"st","c":{"a":0,"k":[0.2,0.2,0.2,1],"ix":3},"o":{"a":0,"k":100,"ix":4},"w":{"a":0,"k":3,"ix":5},"lc":2,"lj":1,"ml":4,"bm":0,"nm":"Stroke 1","mn":"ADBE Vector Graphic - Stroke","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Circle","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"gr","it":[{"ty":"rc","d":1,"s":{"a":0,"k":[3,15],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":45,"ix":4},"nm":"Rectangle Path 1","mn":"ADBE Vector Shape - Rect","hd":false},{"ty":"fl","c":{"a":0,"k":[0.2,0.2,0.2,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Handle","np":3,"cix":2,"bm":0,"ix":2,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":60,"s":[100]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":60,"s":[100]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":0,"op":120,"st":0,"bm":0}],"markers":[]
-};
-
-const userAnimation = {
-  "v":"5.7.4","fr":60,"ip":0,"op":120,"w":100,"h":100,"nm":"User","ddd":0,"assets":[],"layers":[{"ddd":0,"ind":1,"ty":4,"nm":"User","sr":1,"ks":{"o":{"a":0,"k":100,"ix":11},"r":{"a":0,"k":0,"ix":10},"p":{"a":0,"k":[50,50,0],"ix":2,"l":2},"a":{"a":0,"k":[0,0,0],"ix":1,"l":2},"s":{"a":0,"k":[100,100,100],"ix":6,"l":2}},"ao":0,"shapes":[{"ty":"gr","it":[{"d":1,"ty":"el","s":{"a":0,"k":[30,30],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"nm":"Ellipse Path 1","mn":"ADBE Vector Shape - Ellipse","hd":false},{"ty":"fl","c":{"a":0,"k":[0.2,0.2,0.2,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Head","np":3,"cix":2,"bm":0,"ix":1,"mn":"ADBE Vector Group","hd":false},{"ty":"gr","it":[{"ty":"rc","d":1,"s":{"a":0,"k":[20,30],"ix":2},"p":{"a":0,"k":[0,0],"ix":3},"r":{"a":0,"k":0,"ix":4},"nm":"Rectangle Path 1","mn":"ADBE Vector Shape - Rect","hd":false},{"ty":"fl","c":{"a":0,"k":[0.2,0.2,0.2,1],"ix":4},"o":{"a":0,"k":100,"ix":5},"r":1,"bm":0,"nm":"Fill 1","mn":"ADBE Vector Graphic - Fill","hd":false},{"ty":"tr","p":{"a":0,"k":[0,0],"ix":2},"a":{"a":0,"k":[0,0],"ix":1},"s":{"a":0,"k":[100,100],"ix":3},"r":{"a":0,"k":0,"ix":6},"o":{"a":0,"k":100,"ix":7},"sk":{"a":0,"k":0,"ix":4},"sa":{"a":0,"k":0,"ix":5},"nm":"Transform"}],"nm":"Body","np":3,"cix":2,"bm":0,"ix":2,"mn":"ADBE Vector Group","hd":false},{"ty":"tm","s":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":60,"s":[100]}],"ix":1},"e":{"a":1,"k":[{"i":{"x":[0.833],"y":[0.833]},"o":{"x":[0.167],"y":[0.167]},"t":0,"s":[0]},{"t":60,"s":[100]}],"ix":2},"o":{"a":0,"k":0,"ix":3},"m":1,"ix":2,"nm":"Trim Paths 1","mn":"ADBE Vector Filter - Trim","hd":false}],"ip":0,"op":120,"st":0,"bm":0}],"markers":[]
-};
 
 export const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -43,20 +32,6 @@ export const Header = () => {
     | { type: 'friend'; id: string }
     | null
   >(null);
-
-  const {
-    lottieRef: searchLottieRef,
-    handleMouseEnter: handleSearchMouseEnter,
-    handleMouseLeave: handleSearchMouseLeave,
-    handleComplete: handleSearchComplete
-  } = useAnimation({ autoplay: false, loop: false });
-
-  const {
-    lottieRef: userLottieRef,
-    handleMouseEnter: handleUserMouseEnter,
-    handleMouseLeave: handleUserMouseLeave,
-    handleComplete: handleUserComplete
-  } = useAnimation({ autoplay: false, loop: false });
 
   const handleEditProfileOpenChange = (open: boolean) => {
     console.log('setEditProfileOpen called with:', open);
@@ -174,20 +149,7 @@ export const Header = () => {
 
           {/* Search */}
           <div className="flex-1 max-w-md relative">
-            <div 
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10"
-              onMouseEnter={handleSearchMouseEnter}
-              onMouseLeave={handleSearchMouseLeave}
-            >
-              <LottieAnimation
-                lottieRef={searchLottieRef}
-                animationData={searchAnimation}
-                width={16}
-                height={16}
-                className="text-slate-600"
-                onComplete={handleSearchComplete}
-              />
-            </div>
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 h-4 w-4" />
             <Input
               ref={searchInputRef}
               placeholder="Search books, authors, or friends..."
@@ -292,20 +254,8 @@ export const Header = () => {
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="p-2 text-slate-800 hover:text-slate-900 hover:bg-slate-200 border border-slate-300 hover:border-slate-400 flex items-center justify-center"
-                      onMouseEnter={handleUserMouseEnter}
-                      onMouseLeave={handleUserMouseLeave}
-                    >
-                      <LottieAnimation
-                        lottieRef={userLottieRef}
-                        animationData={userAnimation}
-                        width={20}
-                        height={20}
-                        onComplete={handleUserComplete}
-                      />
+                    <Button variant="ghost" size="sm" className="p-2 text-slate-800 hover:text-slate-900 hover:bg-slate-200 border border-slate-300 hover:border-slate-400">
+                      <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
@@ -330,20 +280,8 @@ export const Header = () => {
               </>
             ) : (
               <Link to="/auth">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="p-2 text-slate-800 hover:text-slate-900 hover:bg-slate-200 border border-slate-300 hover:border-slate-400 flex items-center justify-center"
-                  onMouseEnter={handleUserMouseEnter}
-                  onMouseLeave={handleUserMouseLeave}
-                >
-                  <LottieAnimation
-                    lottieRef={userLottieRef}
-                    animationData={userAnimation}
-                    width={20}
-                    height={20}
-                    onComplete={handleUserComplete}
-                  />
+                <Button variant="ghost" size="sm" className="p-2 text-slate-800 hover:text-slate-900 hover:bg-slate-200 border border-slate-300 hover:border-slate-400">
+                  <User className="h-5 w-5" />
                 </Button>
               </Link>
             )}

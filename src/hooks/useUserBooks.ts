@@ -12,7 +12,6 @@ export interface Book {
   dateFinished?: string;
   notes: string;
   updatedAt: string;
-  favorite?: boolean;
 }
 
 export const useUserBooks = () => {
@@ -54,7 +53,6 @@ export const useUserBooks = () => {
           date_finished,
           notes,
           updated_at,
-          favorite,
           books (
             id,
             title,
@@ -77,8 +75,7 @@ export const useUserBooks = () => {
         dateStarted: userBook.date_started,
         dateFinished: userBook.date_finished,
         notes: userBook.notes || '',
-        updatedAt: userBook.updated_at,
-        favorite: userBook.favorite || false
+        updatedAt: userBook.updated_at
       })) as Book[];
     },
     enabled: !!user,
