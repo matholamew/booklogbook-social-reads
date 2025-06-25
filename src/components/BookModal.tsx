@@ -39,24 +39,27 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   }, [open, bookId]);
 
   // Fetch favorite status for this user/book
-  useEffect(() => {
+  const fetchFavoriteStatus = async () => {
     if (open && bookId && user) {
       setFavoriteLoading(true);
-      supabase
+      const { data } = await supabase
         .from('user_books')
         .select('id, favorite')
         .eq('user_id', user.id)
         .eq('book_id', bookId)
-        .maybeSingle()
-        .then(({ data }) => {
-          setFavorite(!!data?.favorite);
-          setFavoriteId(data?.id || null);
-          setFavoriteLoading(false);
-        });
+        .maybeSingle();
+      setFavorite(!!data?.favorite);
+      setFavoriteId(data?.id || null);
+      setFavoriteLoading(false);
     } else {
       setFavorite(false);
       setFavoriteId(null);
     }
+  };
+
+  useEffect(() => {
+    fetchFavoriteStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, bookId, user]);
 
   // Toggle favorite
@@ -68,8 +71,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
       bookId,
       currentFavorite: favorite,
     });
-    if (result === 'favorited') setFavorite(true);
-    else if (result === 'unfavorited' || result === 'removed') setFavorite(false);
+    await fetchFavoriteStatus();
     setFavoriteLoading(false);
   };
 

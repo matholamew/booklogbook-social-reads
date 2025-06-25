@@ -85,23 +85,25 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, book.id]);
 
+  // Fetch favorite status for this user/book
+  const fetchFavoriteStatus = async () => {
+    if (open && book.id && user) {
+      setFavoriteLoading(true);
+      const { data } = await supabase
+        .from('user_books')
+        .select('favorite')
+        .eq('user_id', user.id)
+        .eq('book_id', book.id)
+        .maybeSingle();
+      setFavorite(!!data?.favorite);
+      setFavoriteLoading(false);
+    } else {
+      setFavorite(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchFavorite = async () => {
-      if (open && book.id && user) {
-        setFavoriteLoading(true);
-        const { data } = await supabase
-          .from('user_books')
-          .select('favorite')
-          .eq('user_id', user.id)
-          .eq('book_id', book.id)
-          .maybeSingle();
-        setFavorite(!!data?.favorite);
-        setFavoriteLoading(false);
-      } else {
-        setFavorite(false);
-      }
-    };
-    fetchFavorite();
+    fetchFavoriteStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, book.id, user]);
 
@@ -146,8 +148,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       bookId: book.id,
       currentFavorite: favorite,
     });
-    if (result === 'favorited') setFavorite(true);
-    else if (result === 'unfavorited' || result === 'removed') setFavorite(false);
+    await fetchFavoriteStatus();
     setFavoriteLoading(false);
   };
 
