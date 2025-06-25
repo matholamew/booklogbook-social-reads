@@ -75,13 +75,15 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
 
   // Toggle favorite
   const handleToggleFavorite = async () => {
-    if (!user || !bookId) return;
+    if (!user || !bookId || !book) return;
     setFavoriteLoading(true);
     try {
       const { result, errorMessage } = await toggleFavoriteBook({
         userId: user.id,
         bookId,
         currentFavorite: favorite,
+        bookTitle: book.title,
+        bookAuthor: book.authors?.name,
       });
       console.log('Toggle favorite result:', result, errorMessage);
       if (result === 'favorited') {

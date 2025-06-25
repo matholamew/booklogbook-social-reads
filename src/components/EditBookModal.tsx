@@ -151,13 +151,15 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   };
 
   const handleToggleFavorite = async () => {
-    if (!user || !book.id) return;
+    if (!user || !book.id || !book.title || !book.author) return;
     setFavoriteLoading(true);
     try {
       const { result, errorMessage } = await toggleFavoriteBook({
         userId: user.id,
         bookId: book.id,
         currentFavorite: favorite,
+        bookTitle: book.title,
+        bookAuthor: book.author,
       });
       console.log('Toggle favorite result:', result, errorMessage);
       if (result === 'favorited') {
