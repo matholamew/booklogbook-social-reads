@@ -154,6 +154,30 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         .update({ favorite: !favorite })
         .eq('id', data.id);
       if (!error) setFavorite(fav => !fav);
+    } else {
+      // Row does not exist, need to insert
+      // Find the book's author_id
+      const { data: bookData } = await supabase
+        .from('books')
+        .select('id, author_id')
+        .eq('id', book.id)
+        .single();
+      if (!bookData) {
+        setFavoriteLoading(false);
+        return;
+      }
+      const { error } = await supabase
+        .from('user_books')
+        .insert({
+          user_id: user.id,
+          book_id: book.id,
+          favorite: true,
+          status: formData.status,
+          date_started: formData.dateStarted || null,
+          date_finished: formData.dateFinished || null,
+          notes: formData.notes || null,
+        });
+      if (!error) setFavorite(true);
     }
     setFavoriteLoading(false);
   };
