@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "dist/functions",
-    "rootDir": "functions",
+    "rootDir": "src-functions",
     "module": "CommonJS",
     "target": "ES2020",
     "esModuleInterop": true,
@@ -9,5 +9,5 @@
     "types": ["@cloudflare/workers-types"],
     "lib": ["ES2020"]
   },
-  "include": ["functions/*.ts"]
+  "include": ["src-functions/*.ts"]
 }
