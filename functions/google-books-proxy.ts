@@ -4,7 +4,6 @@ interface Env {
   GOOGLE_BOOKS_API_KEY: string;
 }
 
-// @ts-expect-error: TypeScript type mismatch between global Response and Cloudflare Workers Response is safe to ignore
 export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q');
