@@ -16,12 +16,13 @@ import { BookModal } from '@/components/BookModal';
 import { AuthorModal } from '@/components/AuthorModal';
 import { FriendModal } from '@/components/FriendModal';
 import { toast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const Header = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { user, signOut } = useAuth();
   const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState<any>({ books: [], authors: [], friends: [] });
+  const [searchResults, setSearchResults] = useState<any>({ googleBooks: [], books: [], authors: [], friends: [] });
   const [searchLoading, setSearchLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -30,8 +31,10 @@ export const Header = () => {
     | { type: 'book'; id: string }
     | { type: 'author'; id: string }
     | { type: 'friend'; id: string }
+    | { type: 'googleBook'; book: any }
     | null
   >(null);
+  const queryClient = useQueryClient();
 
   const handleEditProfileOpenChange = (open: boolean) => {
     console.log('setEditProfileOpen called with:', open);
@@ -41,32 +44,60 @@ export const Header = () => {
   // Search logic
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setSearchResults({ books: [], authors: [], friends: [] });
+      setSearchResults({ books: [], authors: [], friends: [], googleBooks: [] });
       setShowDropdown(false);
       return;
     }
     setSearchLoading(true);
     setShowDropdown(true);
     const fetchResults = async () => {
-      // Books
+      // Books from Supabase
       const { data: books } = await supabase
         .from('books')
         .select('id, title')
         .ilike('title', `%${searchQuery}%`)
         .limit(5);
-      // Authors
+      // Authors from Supabase
       const { data: authors } = await supabase
         .from('authors')
         .select('id, name')
         .ilike('name', `%${searchQuery}%`)
         .limit(5);
-      // Friends (users)
+      // Friends (users) from Supabase
       const { data: friends } = await supabase
         .from('profiles')
         .select('id, username, display_name, avatar_url')
         .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
         .limit(5);
-      setSearchResults({ books: books || [], authors: authors || [], friends: friends || [] });
+      // Google Books API
+      let googleBooks: any[] = [];
+      try {
+        const res = await fetch(`/api/google-books-proxy?q=${encodeURIComponent(searchQuery)}`);
+        const googleData = await res.json();
+        googleBooks = (googleData.items || []).map((item: any) => {
+          const info = item.volumeInfo;
+          return {
+            id: item.id,
+            title: info.title,
+            authors: info.authors || [],
+            coverUrl: info.imageLinks?.thumbnail || '',
+            description: info.description || '',
+            pageCount: info.pageCount,
+            publishedDate: info.publishedDate,
+            isbn: (info.industryIdentifiers || []).find((id: any) => id.type === 'ISBN_13')?.identifier || '',
+            googleBooksUrl: info.infoLink,
+            _type: 'googleBook',
+          };
+        });
+      } catch (err) {
+        googleBooks = [];
+      }
+      setSearchResults({
+        books: books || [],
+        authors: authors || [],
+        friends: friends || [],
+        googleBooks,
+      });
       setSearchLoading(false);
     };
     const timeout = setTimeout(fetchResults, 250); // debounce
@@ -78,6 +109,7 @@ export const Header = () => {
     ...searchResults.books.map((b: any) => ({ ...b, _type: 'book' })),
     ...searchResults.authors.map((a: any) => ({ ...a, _type: 'author' })),
     ...searchResults.friends.map((f: any) => ({ ...f, _type: 'friend' })),
+    ...searchResults.googleBooks.map((g: any) => ({ ...g, _type: 'googleBook' })),
   ];
 
   // Handle result selection (click or Enter)
@@ -89,6 +121,8 @@ export const Header = () => {
       setModalState({ type: 'author', id: result.id });
     } else if (result._type === 'friend') {
       setModalState({ type: 'friend', id: result.id });
+    } else if (result._type === 'googleBook') {
+      setModalState({ type: 'googleBook', book: result });
     }
     setShowDropdown(false);
   };
@@ -137,6 +171,92 @@ export const Header = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showDropdown]);
 
+  // Add to Library logic for Google Books
+  async function handleAddGoogleBookToLibrary(googleBook: any) {
+    if (!user) return;
+    try {
+      // 1. Ensure author exists
+      let authorId = null;
+      const authorName = googleBook.authors && googleBook.authors.length > 0 ? googleBook.authors[0] : 'Unknown Author';
+      if (authorName) {
+        const { data: authorData, error: authorError } = await supabase
+          .from('authors')
+          .select('id')
+          .eq('name', authorName)
+          .maybeSingle();
+        if (authorError) throw authorError;
+        if (authorData && authorData.id) {
+          authorId = authorData.id;
+        } else {
+          const { data: newAuthor, error: authorInsertError } = await supabase
+            .from('authors')
+            .insert({ name: authorName })
+            .select('id')
+            .single();
+          if (authorInsertError) throw authorInsertError;
+          authorId = newAuthor.id;
+        }
+      }
+      // 2. Ensure book exists
+      let bookId = null;
+      const { data: bookData, error: bookFetchError } = await supabase
+        .from('books')
+        .select('id')
+        .eq('title', googleBook.title)
+        .eq('author_id', authorId)
+        .maybeSingle();
+      if (bookFetchError) throw bookFetchError;
+      if (bookData && bookData.id) {
+        bookId = bookData.id;
+      } else {
+        const { data: newBook, error: bookInsertError } = await supabase
+          .from('books')
+          .insert({
+            title: googleBook.title,
+            author_id: authorId,
+            cover_url: googleBook.coverUrl,
+            description: googleBook.description,
+            page_count: googleBook.pageCount,
+            published_date: googleBook.publishedDate,
+            isbn: googleBook.isbn,
+            google_books_url: googleBook.googleBooksUrl,
+          })
+          .select('id')
+          .single();
+        if (bookInsertError) throw bookInsertError;
+        bookId = newBook.id;
+      }
+      // 3. Add to user_books if not already present
+      const { data: userBook, error: userBookFetchError } = await supabase
+        .from('user_books')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('book_id', bookId)
+        .maybeSingle();
+      if (userBookFetchError) throw userBookFetchError;
+      if (userBook && userBook.id) {
+        toast({ title: 'Already in Library', description: 'This book is already in your reading list.' });
+        queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+        setModalState(null);
+        return;
+      }
+      const { error: insertError } = await supabase
+        .from('user_books')
+        .insert({
+          user_id: user.id,
+          book_id: bookId,
+          status: 'planned',
+          favorite: false,
+        });
+      if (insertError) throw insertError;
+      toast({ title: 'Book Added', description: 'Book added to your "To Be Read" list.' });
+      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+      setModalState(null);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to add book to library.' });
+    }
+  }
+
   return (
     <header className="bg-white border-b border-border shadow-sm sticky top-0 z-50" style={{ backgroundColor: '#fff' }}>
       <div className="max-w-6xl mx-auto px-4 py-3">
@@ -167,7 +287,7 @@ export const Header = () => {
                   <div className="p-4 text-slate-600">Searching...</div>
                 ) : (
                   <>
-                    {searchResults.books.length === 0 && searchResults.authors.length === 0 && searchResults.friends.length === 0 ? (
+                    {searchResults.books.length === 0 && searchResults.authors.length === 0 && searchResults.friends.length === 0 && searchResults.googleBooks.length === 0 ? (
                       <div className="p-4 text-slate-600">No results found.</div>
                     ) : (
                       <>
@@ -235,6 +355,31 @@ export const Header = () => {
                                   )}
                                   <span className="font-medium">{friend.display_name || friend.username}</span>
                                   <span className="text-xs text-slate-500 ml-2">@{friend.username}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {searchResults.googleBooks && searchResults.googleBooks.length > 0 && (
+                          <div>
+                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-blue-500 uppercase">Google Books</div>
+                            {searchResults.googleBooks.map((book: any, i: number) => {
+                              const flatIdx = searchResults.books.length + searchResults.authors.length + searchResults.friends.length + i;
+                              return (
+                                <div
+                                  key={book.id}
+                                  className={`px-4 py-2 hover:bg-slate-100 cursor-pointer text-slate-900 flex items-center gap-2 ${highlightedIndex === flatIdx ? 'bg-slate-200' : ''}`}
+                                  role="option"
+                                  aria-selected={highlightedIndex === flatIdx}
+                                  onMouseDown={() => handleResultSelect(book)}
+                                  onMouseEnter={() => setHighlightedIndex(flatIdx)}
+                                >
+                                  {book.coverUrl && <img src={book.coverUrl} alt={book.title + ' cover'} className="w-6 h-8 object-cover rounded mr-2" />}
+                                  <span>{book.title}</span>
+                                  {book.authors && book.authors.length > 0 && (
+                                    <span className="ml-2 text-xs text-slate-500">by {book.authors.join(', ')}</span>
+                                  )}
+                                  <span className="ml-auto text-xs text-blue-500">Google</span>
                                 </div>
                               );
                             })}
@@ -324,6 +469,28 @@ export const Header = () => {
             }
           }}
         />
+      )}
+      {modalState?.type === 'googleBook' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
+            <button className="absolute top-2 right-2 text-slate-500 hover:text-slate-700" onClick={() => setModalState(null)}>&times;</button>
+            <div className="flex gap-4 items-start mb-4">
+              <img src={modalState.book.coverUrl || '/public/placeholder.svg'} alt={modalState.book.title + ' cover'} className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white" />
+              <div className="flex-1">
+                <h2 className="font-serif text-2xl text-slate-900 mb-2">{modalState.book.title}</h2>
+                <div className="text-slate-700 mb-2">by {modalState.book.authors?.join(', ') || 'Unknown Author'}</div>
+                {modalState.book.publishedDate && <div className="text-xs text-slate-500 mb-1">Published: {modalState.book.publishedDate}</div>}
+                {modalState.book.pageCount && <div className="text-xs text-slate-500 mb-1">Pages: {modalState.book.pageCount}</div>}
+                {modalState.book.isbn && <div className="text-xs text-slate-500 mb-1">ISBN: {modalState.book.isbn}</div>}
+                <a href={modalState.book.googleBooksUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-xs">View on Google Books</a>
+              </div>
+            </div>
+            {modalState.book.description && <div className="text-slate-800 text-sm mb-4 max-h-40 overflow-y-auto">{modalState.book.description}</div>}
+            <Button className="w-full bg-slate-700 hover:bg-slate-800 text-white" onClick={() => handleAddGoogleBookToLibrary(modalState.book)}>
+              Add to Library
+            </Button>
+          </div>
+        </div>
       )}
     </header>
   );
