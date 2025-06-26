@@ -23,6 +23,7 @@ interface EditBookModalProps {
     dateStarted?: string;
     dateFinished?: string;
     notes?: string;
+    coverUrl?: string;
   };
 }
 
@@ -243,6 +244,17 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
           <div className="p-8 text-center text-slate-600">Loading latest book data...</div>
         ) : (
         <form onSubmit={handleSave} className="space-y-4">
+          <div className="flex flex-row items-start gap-4 mb-4">
+            <img
+              src={book.coverUrl || '/public/placeholder.svg'}
+              alt={book.title + ' cover'}
+              className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
+            />
+            <div className="flex flex-col justify-center">
+              <div className="font-serif text-2xl text-slate-900 mb-2">{book.title}</div>
+              <div className="text-slate-700 mb-4">by {book.author}</div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 gap-4">
             <div>
               <Label className="text-slate-800 font-medium">Title</Label>

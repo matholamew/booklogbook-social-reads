@@ -11,6 +11,7 @@ interface Book {
   notes?: string;
   status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
   favorite?: boolean;
+  coverUrl?: string;
 }
 
 interface BookCardProps {
@@ -55,47 +56,54 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
       aria-label={onClick ? `View details for ${book.title}` : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } } : undefined}
     >
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <Badge className={`${getStatusColor(book.status)} transition-all duration-200 font-medium text-xs`}>
-            {getStatusText(book.status)}
-          </Badge>
-          {book.favorite && (
-            <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 ml-2" />
-          )}
-        </div>
-        
-        <h3 className="font-semibold text-lg text-slate-900 mb-1 line-clamp-2 font-serif">
-          {book.title}
-        </h3>
-        
-        <div className="flex items-center text-slate-800 mb-3">
-          <UserIcon className="h-4 w-4 mr-1" />
-          <span className="text-sm font-medium">{book.author}</span>
-        </div>
-
-        {(book.dateStarted || book.dateFinished) && (
-          <div className="flex flex-wrap gap-2 text-xs text-slate-700 mb-2">
-            {book.dateStarted && (
-              <div className="flex items-center">
-                <Calendar className="h-3 w-3 mr-1" />
-                Started: {parseLocalDate(book.dateStarted)?.toLocaleDateString()}
-              </div>
-            )}
-            {book.dateFinished && (
-              <div className="flex items-center">
-                <Calendar className="h-3 w-3 mr-1" />
-                Finished: {parseLocalDate(book.dateFinished)?.toLocaleDateString()}
-              </div>
+      <CardContent className="p-4 flex gap-4 items-start">
+        <img
+          src={book.coverUrl || '/public/placeholder.svg'}
+          alt={book.title + ' cover'}
+          className="w-16 h-24 object-cover rounded shadow border border-slate-200 bg-white flex-shrink-0"
+        />
+        <div className="flex-1 min-w-0 flex flex-col justify-center">
+          <div className="flex justify-between items-start mb-3">
+            <Badge className={`${getStatusColor(book.status)} transition-all duration-200 font-medium text-xs`}>
+              {getStatusText(book.status)}
+            </Badge>
+            {book.favorite && (
+              <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 ml-2" />
             )}
           </div>
-        )}
+          
+          <h3 className="font-semibold text-lg text-slate-900 mb-1 line-clamp-2 font-serif">
+            {book.title}
+          </h3>
+          
+          <div className="flex items-center text-slate-800 mb-3">
+            <UserIcon className="h-4 w-4 mr-1" />
+            <span className="text-sm font-medium">{book.author}</span>
+          </div>
 
-        {book.notes && (
-          <p className="text-sm text-slate-800 line-clamp-2 mt-2 whitespace-pre-line">
-            {book.notes}
-          </p>
-        )}
+          {(book.dateStarted || book.dateFinished) && (
+            <div className="flex flex-wrap gap-2 text-xs text-slate-700 mb-2">
+              {book.dateStarted && (
+                <div className="flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Started: {parseLocalDate(book.dateStarted)?.toLocaleDateString()}
+                </div>
+              )}
+              {book.dateFinished && (
+                <div className="flex items-center">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  Finished: {parseLocalDate(book.dateFinished)?.toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          )}
+
+          {book.notes && (
+            <p className="text-sm text-slate-800 line-clamp-2 mt-2 whitespace-pre-line">
+              {book.notes}
+            </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

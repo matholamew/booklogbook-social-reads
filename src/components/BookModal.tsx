@@ -206,8 +206,17 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
           <div className="text-slate-700">Loading...</div>
         ) : book ? (
           <>
-            <h2 className="font-serif text-2xl text-slate-900 mb-2">{book.title}</h2>
-            <div className="text-slate-700 mb-4">by {book.authors?.name || 'Unknown Author'}</div>
+            <div className="flex flex-row items-start gap-4 mb-4">
+              <img
+                src={book.coverUrl || '/public/placeholder.svg'}
+                alt={book.title + ' cover'}
+                className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
+              />
+              <div className="flex flex-col justify-center">
+                <h2 className="font-serif text-2xl text-slate-900 mb-2">{book.title}</h2>
+                <div className="text-slate-700 mb-4">by {book.authors?.name || 'Unknown Author'}</div>
+              </div>
+            </div>
             <Button className="w-full bg-slate-700 hover:bg-slate-800 text-white" onClick={handleAddToLibrary}>Add to Library</Button>
           </>
         ) : (
