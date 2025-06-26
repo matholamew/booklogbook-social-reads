@@ -1,10 +1,14 @@
-import type { PagesFunction } from '@cloudflare/workers-types';
+import { PagesFunction, Response as CfResponse } from '@cloudflare/workers-types';
 
-export const onRequestGet: PagesFunction = async ({ request, env }) => {
+interface Env {
+  GOOGLE_BOOKS_API_KEY: string;
+}
+
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q');
   if (!q) {
-    return new Response('Missing search query', { status: 400 });
+    return new CfResponse('Missing search query', { status: 400 });
   }
 
   const apiKey = env.GOOGLE_BOOKS_API_KEY;
@@ -13,7 +17,7 @@ export const onRequestGet: PagesFunction = async ({ request, env }) => {
   const apiRes = await fetch(apiUrl);
   const data = await apiRes.text();
 
-  return new Response(data, {
+  return new CfResponse(data, {
     status: apiRes.status,
     headers: { 'Content-Type': 'application/json' },
   });
