@@ -1,5 +1,5 @@
 name = "booklogbook-social-reads"
 compatibility_date = "2025-07-02"
 
-[site]
+[assets]
 bucket = "./dist" 
