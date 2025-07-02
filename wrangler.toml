@@ -1,5 +1,5 @@
-name = "booklogbook-social-reads"
+name = "booklogbook"
 compatibility_date = "2025-07-02"
 
 [assets]
-bucket = "./dist" 
+directory = "./dist" 
