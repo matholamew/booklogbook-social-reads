@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && tsc --project tsconfig.functions.json && mkdir -p dist/functions && cp functions/*.ts dist/functions/",
+    "build": "vite build && tsc --project tsconfig.functions.json && mkdir -p dist/functions && cp src-functions/*.ts dist/functions/",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

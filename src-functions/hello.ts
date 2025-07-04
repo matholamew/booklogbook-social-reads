@@ -1,3 +1,1 @@
-export const onRequestGet = () => {
-  return new Response('Hello from Cloudflare Functions!');
-}; 
+export const onRequestGet = () => new Response('Hello from functions!'); 
