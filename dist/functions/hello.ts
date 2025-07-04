@@ -1,0 +1,1 @@
+export const onRequestGet = () => new Response('Hello from functions!'); 
