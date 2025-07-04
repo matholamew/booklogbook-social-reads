@@ -4,11 +4,11 @@ interface Env {
   GOOGLE_BOOKS_API_KEY: string;
 }
 
-export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+export const onRequestGet = async ({ request, env }) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q');
   if (!q) {
-    return new Response('Missing search query', { status: 400 }) as unknown as Response;
+    return new Response('Missing search query', { status: 400 });
   }
 
   const apiKey = env.GOOGLE_BOOKS_API_KEY;
@@ -20,5 +20,5 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   return new Response(data, {
     status: apiRes.status,
     headers: { 'Content-Type': 'application/json' },
-  }) as unknown as Response;
+  });
 }; 
