@@ -2,12 +2,16 @@
   "compilerOptions": {
     "outDir": "dist/functions",
     "rootDir": "src-functions",
-    "module": "CommonJS",
-    "target": "ES2020",
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
+    "allowJs": false,
     "strict": true,
-    "types": ["@cloudflare/workers-types"],
-    "lib": ["ES2020"]
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "noEmitOnError": true
   },
-  "include": ["src-functions/*.ts"]
+  "include": ["src-functions"]
 }
