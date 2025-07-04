@@ -4,7 +4,7 @@ interface Env {
   GOOGLE_BOOKS_API_KEY: string;
 }
 
-export const onRequestGet = async ({ request, env }) => {
+export const onRequestGet = async ({ request, env }: any) => {
   const url = new URL(request.url);
   const q = url.searchParams.get('q');
   if (!q) {
