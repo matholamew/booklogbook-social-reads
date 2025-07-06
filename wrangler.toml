@@ -1,5 +1,9 @@
 name = "booklogbook"
 compatibility_date = "2025-07-02"
 
+[build]
+command = "npm run build"
+pages_build_output_dir = "./dist"
+
 [assets]
 directory = "./dist"
