@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BookModal } from '@/components/BookModal';
 import { AuthorModal } from '@/components/AuthorModal';
 import { FriendModal } from '@/components/FriendModal';
+import { GoogleBooksModal } from '@/components/GoogleBooksModal';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -171,91 +172,7 @@ export const Header = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showDropdown]);
 
-  // Add to Library logic for Google Books
-  async function handleAddGoogleBookToLibrary(googleBook: any) {
-    if (!user) return;
-    try {
-      // 1. Ensure author exists
-      let authorId = null;
-      const authorName = googleBook.authors && googleBook.authors.length > 0 ? googleBook.authors[0] : 'Unknown Author';
-      if (authorName) {
-        const { data: authorData, error: authorError } = await supabase
-          .from('authors')
-          .select('id')
-          .eq('name', authorName)
-          .maybeSingle();
-        if (authorError) throw authorError;
-        if (authorData && authorData.id) {
-          authorId = authorData.id;
-        } else {
-          const { data: newAuthor, error: authorInsertError } = await supabase
-            .from('authors')
-            .insert({ name: authorName })
-            .select('id')
-            .single();
-          if (authorInsertError) throw authorInsertError;
-          authorId = newAuthor.id;
-        }
-      }
-      // 2. Ensure book exists
-      let bookId = null;
-      const { data: bookData, error: bookFetchError } = await supabase
-        .from('books')
-        .select('id')
-        .eq('title', googleBook.title)
-        .eq('author_id', authorId)
-        .maybeSingle();
-      if (bookFetchError) throw bookFetchError;
-      if (bookData && bookData.id) {
-        bookId = bookData.id;
-      } else {
-        const { data: newBook, error: bookInsertError } = await supabase
-          .from('books')
-          .insert({
-            title: googleBook.title,
-            author_id: authorId,
-            cover_url: googleBook.coverUrl,
-            description: googleBook.description,
-            page_count: googleBook.pageCount,
-            published_date: googleBook.publishedDate,
-            isbn: googleBook.isbn,
-            google_books_url: googleBook.googleBooksUrl,
-          })
-          .select('id')
-          .single();
-        if (bookInsertError) throw bookInsertError;
-        bookId = newBook.id;
-      }
-      // 3. Add to user_books if not already present
-      const { data: userBook, error: userBookFetchError } = await supabase
-        .from('user_books')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('book_id', bookId)
-        .maybeSingle();
-      if (userBookFetchError) throw userBookFetchError;
-      if (userBook && userBook.id) {
-        toast({ title: 'Already in Library', description: 'This book is already in your reading list.' });
-        queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
-        setModalState(null);
-        return;
-      }
-      const { error: insertError } = await supabase
-        .from('user_books')
-        .insert({
-          user_id: user.id,
-          book_id: bookId,
-          status: 'planned',
-          favorite: false,
-        });
-      if (insertError) throw insertError;
-      toast({ title: 'Book Added', description: 'Book added to your "To Be Read" list.' });
-      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
-      setModalState(null);
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Failed to add book to library.' });
-    }
-  }
+
 
   return (
     <header className="bg-white border-b border-border shadow-sm sticky top-0 z-50" style={{ backgroundColor: '#fff' }}>
@@ -471,26 +388,11 @@ export const Header = () => {
         />
       )}
       {modalState?.type === 'googleBook' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white rounded-lg shadow-lg max-w-lg w-full p-6 relative">
-            <button className="absolute top-2 right-2 text-slate-500 hover:text-slate-700" onClick={() => setModalState(null)}>&times;</button>
-            <div className="flex gap-4 items-start mb-4">
-              <img src={modalState.book.coverUrl || '/public/placeholder.svg'} alt={modalState.book.title + ' cover'} className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white" />
-              <div className="flex-1">
-                <h2 className="font-serif text-2xl text-slate-900 mb-2">{modalState.book.title}</h2>
-                <div className="text-slate-700 mb-2">by {modalState.book.authors?.join(', ') || 'Unknown Author'}</div>
-                {modalState.book.publishedDate && <div className="text-xs text-slate-500 mb-1">Published: {modalState.book.publishedDate}</div>}
-                {modalState.book.pageCount && <div className="text-xs text-slate-500 mb-1">Pages: {modalState.book.pageCount}</div>}
-                {modalState.book.isbn && <div className="text-xs text-slate-500 mb-1">ISBN: {modalState.book.isbn}</div>}
-                <a href={modalState.book.googleBooksUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline text-xs">View on Google Books</a>
-              </div>
-            </div>
-            {modalState.book.description && <div className="text-slate-800 text-sm mb-4 max-h-40 overflow-y-auto">{modalState.book.description}</div>}
-            <Button className="w-full bg-slate-700 hover:bg-slate-800 text-white" onClick={() => handleAddGoogleBookToLibrary(modalState.book)}>
-              Add to Library
-            </Button>
-          </div>
-        </div>
+        <GoogleBooksModal
+          open={modalState.type === 'googleBook'}
+          book={modalState.book}
+          onClose={() => setModalState(null)}
+        />
       )}
     </header>
   );
