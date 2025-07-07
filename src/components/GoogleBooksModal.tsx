@@ -130,7 +130,6 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
           page_count: book.pageCount,
           published_date: book.publishedDate,
           isbn: book.isbn,
-          google_books_url: book.googleBooksUrl,
         })
         .select('id')
         .single();
@@ -148,7 +147,6 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
             page_count: book.pageCount,
             published_date: book.publishedDate,
             isbn: book.isbn,
-            google_books_url: book.googleBooksUrl,
           })
           .select('id')
           .single();
