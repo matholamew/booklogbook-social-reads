@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { useAuth } from '@/hooks/useAuth';
-
+import { Star, StarOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -16,10 +16,77 @@ interface GoogleBooksModalProps {
 export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-
+  const [favorite, setFavorite] = useState<boolean>(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
   const queryClient = useQueryClient();
 
+  // Fetch favorite status for this user/book (by ISBN)
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      if (open && user && book?.isbn) {
+        setFavoriteLoading(true);
+        const { data, error } = await supabase
+          .from('user_books')
+          .select('id, favorite, book_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (!error && data && data.favorite && data.book_id) {
+          // Optionally, you could check if the book_id matches a book with this ISBN
+          setFavorite(!!data.favorite);
+        } else {
+          setFavorite(false);
+        }
+        setFavoriteLoading(false);
+      } else {
+        setFavorite(false);
+      }
+    };
+    fetchFavoriteStatus();
+  }, [open, user, book]);
 
+  // Toggle favorite handler (by ISBN)
+  const handleToggleFavorite = async () => {
+    if (!user || !book?.isbn) return;
+    setFavoriteLoading(true);
+    try {
+      // Find the book by ISBN
+      const { data: bookData, error: bookError } = await supabase
+        .from('books')
+        .select('id')
+        .eq('isbn', book.isbn)
+        .maybeSingle();
+      if (bookError || !bookData?.id) throw bookError || new Error('Book not found');
+      // Find user_book
+      const { data: userBook, error: userBookError } = await supabase
+        .from('user_books')
+        .select('id, favorite')
+        .eq('user_id', user.id)
+        .eq('book_id', bookData.id)
+        .maybeSingle();
+      if (userBookError) throw userBookError;
+      if (userBook && userBook.id) {
+        // Toggle favorite
+        const { error: updateError } = await supabase
+          .from('user_books')
+          .update({ favorite: !userBook.favorite })
+          .eq('id', userBook.id);
+        if (updateError) throw updateError;
+        setFavorite(!userBook.favorite);
+      } else {
+        // Insert as favorite if not present
+        const { error: insertError } = await supabase
+          .from('user_books')
+          .insert({ user_id: user.id, book_id: bookData.id, favorite: true, status: 'planned' });
+        if (insertError) throw insertError;
+        setFavorite(true);
+      }
+      toast({ title: favorite ? 'Book Unfavorited' : 'Book Favorited', description: favorite ? 'Book removed from your favorites.' : 'Book added to your favorites.' });
+      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to update favorite status.' });
+    }
+    setFavoriteLoading(false);
+  };
 
   // Add to Library handler
   const handleAddToLibrary = async () => {
@@ -53,13 +120,21 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
 
       // 2. Ensure book exists
       let bookId = null;
-      const { data: bookData, error: bookFetchError } = await supabase
+      const { data: bookData, error: bookError } = await supabase
         .from('books')
+        .insert({
+          title: book.title,
+          author_id: authorId,
+          cover_image_url: book.coverUrl,
+          description: book.description,
+          page_count: book.pageCount,
+          published_date: book.publishedDate,
+          isbn: book.isbn,
+          google_books_url: book.googleBooksUrl,
+        })
         .select('id')
-        .eq('title', book.title)
-        .eq('author_id', authorId)
-        .maybeSingle();
-      if (bookFetchError) throw bookFetchError;
+        .single();
+      if (bookError) throw bookError;
       if (bookData && bookData.id) {
         bookId = bookData.id;
       } else {
@@ -73,7 +148,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
             page_count: book.pageCount,
             published_date: book.publishedDate,
             isbn: book.isbn,
-            amazon_url: book.googleBooksUrl,
+            google_books_url: book.googleBooksUrl,
           })
           .select('id')
           .single();
@@ -114,19 +189,29 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
     setLoading(false);
   };
 
-
-
   if (!open || !book) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
-          <DialogTitle className="font-serif text-xl text-slate-900">
-            Google Book
+          <DialogTitle className="font-serif text-xl text-slate-900 flex items-center gap-2">
+            Book
+            {user && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="ml-2"
+                onClick={handleToggleFavorite}
+                disabled={favoriteLoading}
+                aria-label={favorite ? 'Unfavorite' : 'Favorite'}
+              >
+                {favorite ? <Star className="text-yellow-400 fill-yellow-400" /> : <StarOff className="text-slate-400" />}
+              </Button>
+            )}
           </DialogTitle>
         </DialogHeader>
-        
         <div className="flex flex-row items-start gap-4 mb-4">
           <img
             src={book.coverUrl || '/public/placeholder.svg'}
