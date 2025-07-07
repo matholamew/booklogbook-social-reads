@@ -24,6 +24,9 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const queryClient = useQueryClient();
 
+  // Debug log for troubleshooting cover_url
+  console.log('BookModal book object:', book);
+
   // Fetch book info
   useEffect(() => {
     if (open && bookId) {
