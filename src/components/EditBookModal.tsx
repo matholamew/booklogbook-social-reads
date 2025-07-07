@@ -24,6 +24,7 @@ interface EditBookModalProps {
     dateFinished?: string;
     notes?: string;
     coverUrl?: string;
+    cover_url?: string;
   };
 }
 
@@ -246,7 +247,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-row items-start gap-4 mb-4">
             <img
-              src={book.coverUrl || '/public/placeholder.svg'}
+              src={book.cover_url || book.coverUrl || '/public/placeholder.svg'}
               alt={book.title + ' cover'}
               className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
             />
