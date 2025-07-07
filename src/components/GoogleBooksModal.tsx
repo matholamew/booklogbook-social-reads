@@ -218,27 +218,28 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
           />
           <div className="flex flex-col justify-center">
             <h2 className="font-serif text-2xl text-slate-900 mb-2">{book.title}</h2>
-            <div className="text-slate-700 mb-2">by {book.authors?.join(', ') || 'Unknown Author'}</div>
-            {book.publishedDate && <div className="text-xs text-slate-500 mb-1">Published: {book.publishedDate}</div>}
-            {book.pageCount && <div className="text-xs text-slate-500 mb-1">Pages: {book.pageCount}</div>}
-            {book.isbn && <div className="text-xs text-slate-500 mb-1">ISBN: {book.isbn}</div>}
-            <a 
-              href={book.googleBooksUrl} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-blue-600 underline text-xs hover:text-blue-800"
-            >
-              View on Google Books
-            </a>
+            <div className="text-slate-700 mb-4">by {book.authors?.join(', ') || 'Unknown Author'}</div>
           </div>
         </div>
-        
+        {/* Extra Google Books fields, styled to match BookModal */}
+        {book.publishedDate && <div className="text-xs text-slate-500 mb-1">Published: {book.publishedDate}</div>}
+        {book.pageCount && <div className="text-xs text-slate-500 mb-1">Pages: {book.pageCount}</div>}
+        {book.isbn && <div className="text-xs text-slate-500 mb-1">ISBN: {book.isbn}</div>}
+        {book.googleBooksUrl && (
+          <a 
+            href={book.googleBooksUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-600 underline text-xs hover:text-blue-800 mb-2 block"
+          >
+            View on Google Books
+          </a>
+        )}
         {book.description && (
           <div className="text-slate-800 text-sm mb-4 max-h-40 overflow-y-auto border-t border-slate-200 pt-4">
             {book.description}
           </div>
         )}
-        
         <Button 
           className="w-full bg-slate-700 hover:bg-slate-800 text-white" 
           onClick={handleAddToLibrary}

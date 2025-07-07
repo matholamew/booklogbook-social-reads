@@ -220,8 +220,8 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+    <Dialog open={open} onOpenChange={() => onOpenChange(false)}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900 flex items-center gap-2">
             Edit Book
@@ -320,8 +320,8 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-2 border-slate-400 text-slate-800 bg-white hover:bg-slate-50" disabled={loading}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-slate-700 hover:bg-slate-800 text-white" disabled={loading}>
-              Save Changes
+            <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 text-white" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>

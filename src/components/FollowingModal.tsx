@@ -56,7 +56,7 @@ export const FollowingModal = ({ open, onOpenChange }: FollowingModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900">Following</DialogTitle>
         </DialogHeader>
@@ -69,17 +69,15 @@ export const FollowingModal = ({ open, onOpenChange }: FollowingModalProps) => {
         ) : (
           <div className="space-y-4">
             {friends.map(friend => (
-              <Card key={friend.id} className="border-slate-300 bg-white">
-                <CardContent className="py-4">
-                  <div className="font-semibold text-slate-900">{friend.display_name || friend.username}</div>
-                  <div className="text-xs text-slate-500 mb-1">@{friend.username}</div>
-                  {friend.bio && (
-                    <div className="text-sm text-slate-800 line-clamp-2 whitespace-pre-line mt-1">
-                      {friend.bio}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <div key={friend.id} className="border border-slate-300 bg-white rounded-lg p-4">
+                <div className="font-semibold text-slate-900">{friend.display_name || friend.username}</div>
+                <div className="text-xs text-slate-500 mb-1">@{friend.username}</div>
+                {friend.bio && (
+                  <div className="text-sm text-slate-800 line-clamp-2 whitespace-pre-line mt-1">
+                    {friend.bio}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}

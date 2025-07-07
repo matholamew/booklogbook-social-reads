@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ProfileEditModalProps {
   open: boolean;
@@ -108,32 +109,11 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
   if (!open) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0, bottom: 0,
-        background: 'rgba(0,0,0,0.5)',
-        zIndex: 9999,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-      onClick={() => onOpenChange(false)}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: 8,
-          padding: 24,
-          minWidth: 320,
-          maxWidth: 500,
-          width: '100%',
-          position: 'relative',
-          boxShadow: '0 4px 32px rgba(0,0,0,0.15)'
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <h2 className="font-serif text-xl text-slate-900 mb-4">Edit Profile</h2>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+        <DialogHeader>
+          <DialogTitle className="font-serif text-xl text-slate-900">Edit Profile</DialogTitle>
+        </DialogHeader>
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-col items-center gap-2 mb-2">
             <div className="relative">
@@ -201,27 +181,18 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
               id="bio"
               value={bio}
               onChange={e => setBio(e.target.value)}
-              placeholder="Tell us about yourself..."
-              className="mt-1 min-h-[80px] border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
-              maxLength={300}
+              placeholder="Tell us about yourself"
+              className="mt-1 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
+              maxLength={256}
               disabled={loading}
             />
           </div>
-          {error && (
-            <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200" aria-live="polite">
-              {error}
-            </div>
-          )}
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-2 border-slate-400 text-slate-800 bg-white hover:bg-slate-50" disabled={loading}>
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-slate-700 hover:bg-slate-800 text-white" disabled={loading}>
-              Save Changes
-            </Button>
-          </div>
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+          <Button type="submit" className="w-full bg-slate-700 hover:bg-slate-800 text-white" disabled={loading}>
+            {loading ? 'Saving...' : 'Save Changes'}
+          </Button>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }; 
