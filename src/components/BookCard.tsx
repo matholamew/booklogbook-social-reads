@@ -12,7 +12,6 @@ interface Book {
   status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
   favorite?: boolean;
   coverUrl?: string;
-  cover_url?: string;
 }
 
 interface BookCardProps {
@@ -59,7 +58,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
     >
       <CardContent className="p-4 flex gap-4 items-start">
         <img
-          src={(book.cover_url && book.cover_url.trim()) ? book.cover_url : (book.coverUrl && book.coverUrl.trim()) ? book.coverUrl : '/public/placeholder.svg'}
+          src={book.coverUrl || '/public/placeholder.svg'}
           alt={book.title + ' cover'}
           className="w-16 h-24 object-cover rounded shadow border border-slate-200 bg-white flex-shrink-0"
         />

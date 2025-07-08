@@ -12,6 +12,7 @@ export interface Book {
   notes: string;
   updatedAt: string;
   favorite?: boolean;
+  coverUrl?: string;
 }
 
 export const useUserBooks = () => {
@@ -35,6 +36,7 @@ export const useUserBooks = () => {
           books (
             id,
             title,
+            cover_url,
             authors (
               name
             )
@@ -56,6 +58,7 @@ export const useUserBooks = () => {
         notes: userBook.notes || '',
         updatedAt: userBook.updated_at,
         favorite: !!userBook.favorite,
+        coverUrl: userBook.books?.cover_url,
       })) as Book[];
     },
     enabled: !!user,

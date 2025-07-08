@@ -127,7 +127,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
         .insert({
           title: book.title,
           author_id: authorId,
-          cover_image_url: book.coverUrl,
+          cover_url: book.coverUrl,
           description: book.description,
           page_count: book.pageCount,
           published_date: book.publishedDate,
@@ -144,7 +144,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
           .insert({
             title: book.title,
             author_id: authorId,
-            cover_image_url: book.coverUrl,
+            cover_url: book.coverUrl,
             description: book.description,
             page_count: book.pageCount,
             published_date: book.publishedDate,
@@ -214,7 +214,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
         </DialogHeader>
         <div className="flex flex-row items-start gap-4 mb-4">
           <img
-            src={(book.cover_url && book.cover_url.trim()) ? book.cover_url : (book.coverUrl && book.coverUrl.trim()) ? book.coverUrl : '/public/placeholder.svg'}
+            src={book.coverUrl || '/public/placeholder.svg'}
             alt={book.title + ' cover'}
             className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
           />
