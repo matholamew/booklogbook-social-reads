@@ -63,14 +63,7 @@ export const useUserBooks = () => {
           notes: userBook.notes || '',
           updatedAt: userBook.updated_at,
           favorite: !!userBook.favorite,
-          coverUrl: userBook.books?.cover_url
-            ? userBook.books.cover_url.replace('http://books.google.com', 'https://books.google.com')
-            : undefined,
-        };
-        console.log('Transformed book:', transformedBook.title, 'coverUrl:', transformedBook.coverUrl);
-        return transformedBook;
-      }) as Book[];
-    },
+          book_id: userBook.book_id,
     enabled: !!user,
   });
 };

@@ -17,6 +17,7 @@ interface EditBookModalProps {
   onOpenChange: (open: boolean) => void;
   book: {
     id: string;
+    book_id: string;
     title: string;
     author: string;
     status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
@@ -61,50 +62,17 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     }
   };
 
-  // Helper to resolve the real book id (by id or by title/author)
-  const resolveBookId = async () => {
-    // Try by id
-    let { data: bookData, error: bookFetchError } = await supabase
-      .from('books')
-      .select('id, author_id')
-      .eq('id', book.id)
-      .maybeSingle();
-    if (bookFetchError) return null;
-    if (bookData) return bookData.id;
-    // Try by title/author
-    if (!book.title || !book.author) return null;
-    // Find author id
-    const { data: authorData } = await supabase
-      .from('authors')
-      .select('id')
-      .eq('name', book.author)
-      .maybeSingle();
-    if (!authorData) return null;
-    const { data: bookByTitle } = await supabase
-      .from('books')
-      .select('id')
-      .eq('title', book.title)
-      .eq('author_id', authorData.id)
-      .maybeSingle();
-    return bookByTitle?.id || null;
-  };
+  
 
   // Fetch favorite status for this user/book
   const fetchFavoriteStatus = async () => {
     if (!open || !user) return;
     setFavoriteLoading(true);
-    const realBookId = await resolveBookId();
-    if (!realBookId) {
-      setFavorite(false);
-      setUserBookId(null);
-      setFavoriteLoading(false);
-      return;
-    }
     const { data: userBook, error } = await supabase
       .from('user_books')
       .select('id, favorite')
       .eq('user_id', user.id)
-      .eq('book_id', realBookId)
+      .eq('book_id', book.book_id)
       .maybeSingle();
     if (error) {
       setFavorite(false);
@@ -119,28 +87,23 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   // Subscribe to real-time updates for this user/book
   useEffect(() => {
     if (!open || !user) return;
-    let sub: any;
-    (async () => {
-      const realBookId = await resolveBookId();
-      if (!realBookId) return;
-      sub = supabase
-        .channel('user_books_favorite_realtime')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'user_books',
-            filter: `user_id=eq.${user.id},book_id=eq.${realBookId}`,
-          },
-          (payload) => {
-            // Refetch favorite status on any change
-            fetchFavoriteStatus();
-          }
-        )
-        .subscribe();
-      subscriptionRef.current = sub;
-    })();
+    const sub = supabase
+      .channel('user_books_favorite_realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_books',
+          filter: `user_id=eq.${user.id},book_id=eq.${book.book_id}`,
+        },
+        (payload) => {
+          // Refetch favorite status on any change
+          fetchFavoriteStatus();
+        }
+      )
+      .subscribe();
+    subscriptionRef.current = sub;
     return () => {
       if (subscriptionRef.current) {
         supabase.removeChannel(subscriptionRef.current);
@@ -148,12 +111,12 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, book.id, book.title, book.author, user]);
+  }, [open, book.book_id, user]);
 
   useEffect(() => {
     if (open) fetchFavoriteStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, book.id, book.title, book.author, user]);
+  }, [open, book.book_id, user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,15 +154,13 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   };
 
   const handleToggleFavorite = async () => {
-    if (!user || !book.id || !book.title || !book.author) return;
+    if (!user || !book.id) return;
     setFavoriteLoading(true);
     try {
       const { result, errorMessage } = await toggleFavoriteBook({
         userId: user.id,
-        bookId: book.id,
+        bookId: book.book_id, // Use the book_id from the book object
         currentFavorite: favorite,
-        bookTitle: book.title,
-        bookAuthor: book.author,
       });
       if (result === 'favorited') {
         toast({ title: 'Book Favorited', description: 'Book added to your favorites.' });
