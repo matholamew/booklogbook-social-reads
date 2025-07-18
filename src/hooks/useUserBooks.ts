@@ -17,6 +17,7 @@ export interface Book {
 
 export const useUserBooks = () => {
   const { user } = useAuth();
+  console.log('useUserBooks hook called. User:', user); // Debug log to confirm hook usage
 
   return useQuery({
     queryKey: ['user-books', user?.id],
