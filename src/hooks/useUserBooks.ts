@@ -67,7 +67,6 @@ export const useUserBooks = () => {
           updatedAt: userBook.updated_at,
           favorite: !!userBook.favorite,
           coverUrl: userBook.books?.cover_url || '',
-          book_id: userBook.books?.id,
         };
         return transformedBook;
       });
