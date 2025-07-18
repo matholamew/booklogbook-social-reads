@@ -51,8 +51,10 @@ export const useUserBooks = () => {
 
       if (error) throw error;
 
-      // Transform the data to match the expected Book interface
-      return data.map((userBook: any) => {
+    console.log('Supabase user_books data:', data); // Debug log for raw data
+
+    // Map the data to a more usable format
+      const mappedData = data.map((userBook: any) => {
         const transformedBook = {
           id: userBook.id,
           title: userBook.books?.title || 'Unknown Title',
@@ -65,6 +67,8 @@ export const useUserBooks = () => {
           favorite: !!userBook.favorite,
           coverUrl: userBook.books?.cover_url || '',
           book_id: userBook.books?.id,
-    enabled: !!user,
-  });
-};
+        };
+        return transformedBook;
+      });
+      console.log('Mapped data:', mappedData); // Debug log for mapped data
+      return mappedData;
