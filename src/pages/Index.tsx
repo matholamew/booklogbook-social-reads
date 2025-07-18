@@ -66,6 +66,13 @@ const Index = () => {
 
   console.log('Index page rendered');
 
+  useEffect(() => {
+    if (!booksLoading && userBooks.length > 0) {
+        console.log('Index.tsx: userBooks data received:', userBooks);
+        console.log('Index.tsx: First book coverUrl:', userBooks[0]?.coverUrl);
+    }
+  }, [userBooks, booksLoading]);
+
   // Get books for each section
   const readingBooks = userBooks.filter(book => book.status === 'reading')
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
@@ -125,6 +132,7 @@ const Index = () => {
   }, [user]);
 
   const handleBookClick = (book) => {
+    console.log('Index.tsx: handleBookClick - book data:', book);
     setSelectedBook(book);
     setEditModalOpen(true);
   };
