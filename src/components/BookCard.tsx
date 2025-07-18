@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface Book {
-  id: string;
+  id: string; // Make id required
   title: string;
   author: string;
   dateStarted?: string;
@@ -26,7 +26,36 @@ function parseLocalDate(dateString?: string) {
   return new Date(year, month - 1, day);
 }
 
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+
 export const BookCard = ({ book, onClick }: BookCardProps) => {
+  const [coverUrl, setCoverUrl] = useState(book.coverUrl);
+
+  useEffect(() => {
+    const fetchCover = async () => {
+      if (!coverUrl && book.title && book.author) {
+        try {
+          const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.coverUrl) {
+              setCoverUrl(data.coverUrl);
+              // Update the book in the database
+              await supabase
+                .from('books')
+                .update({ cover_url: data.coverUrl })
+                .eq('id', book.id);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching book cover:', error);
+        }
+      }
+    };
+
+    fetchCover();
+  }, [coverUrl, book.title, book.author, book.id]);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'reading': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-400';
@@ -58,7 +87,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
     >
       <CardContent className="p-4 flex gap-4 items-start">
         <img
-          src={book.coverUrl || '/placeholder.svg'}
+          src={coverUrl || '/placeholder.svg'}
           alt={book.title + ' cover'}
           className="w-16 h-24 object-cover rounded shadow border border-slate-200 bg-white flex-shrink-0"
         />
