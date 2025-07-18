@@ -63,7 +63,8 @@ export const useUserBooks = () => {
           notes: userBook.notes || '',
           updatedAt: userBook.updated_at,
           favorite: !!userBook.favorite,
-          book_id: userBook.book_id,
+          coverUrl: userBook.books?.cover_url || '',
+          book_id: userBook.books?.id,
     enabled: !!user,
   });
 };
