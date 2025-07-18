@@ -64,6 +64,8 @@ const Index = () => {
   const booksPerPage = 10;
   const booksPerSection = 6;
 
+  console.log('Index page rendered');
+
   // Get books for each section
   const readingBooks = userBooks.filter(book => book.status === 'reading')
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
