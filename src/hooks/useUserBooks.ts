@@ -45,6 +45,8 @@ export const useUserBooks = () => {
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
+      console.log('Supabase user_books data:', data); // Debug log for cover_url troubleshooting
+
       if (error) throw error;
 
       // Transform the data to match the expected Book interface
