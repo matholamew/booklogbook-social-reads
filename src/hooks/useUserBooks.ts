@@ -47,24 +47,29 @@ export const useUserBooks = () => {
         .order('updated_at', { ascending: false });
 
       console.log('Supabase user_books data:', data); // Debug log for cover_url troubleshooting
+      console.log('First book cover_url:', data?.[0]?.books?.cover_url); // Debug specific cover_url
 
       if (error) throw error;
 
       // Transform the data to match the expected Book interface
-      return data.map((userBook: any) => ({
-        id: userBook.id,
-        title: userBook.books?.title || 'Unknown Title',
-        author: userBook.books?.authors?.name || 'Unknown Author',
-        status: userBook.status,
-        dateStarted: userBook.date_started,
-        dateFinished: userBook.date_finished,
-        notes: userBook.notes || '',
-        updatedAt: userBook.updated_at,
-        favorite: !!userBook.favorite,
-        coverUrl: userBook.books?.cover_url
-          ? userBook.books.cover_url.replace('http://books.google.com', 'https://books.google.com')
-          : undefined,
-      })) as Book[];
+      return data.map((userBook: any) => {
+        const transformedBook = {
+          id: userBook.id,
+          title: userBook.books?.title || 'Unknown Title',
+          author: userBook.books?.authors?.name || 'Unknown Author',
+          status: userBook.status,
+          dateStarted: userBook.date_started,
+          dateFinished: userBook.date_finished,
+          notes: userBook.notes || '',
+          updatedAt: userBook.updated_at,
+          favorite: !!userBook.favorite,
+          coverUrl: userBook.books?.cover_url
+            ? userBook.books.cover_url.replace('http://books.google.com', 'https://books.google.com')
+            : undefined,
+        };
+        console.log('Transformed book:', transformedBook.title, 'coverUrl:', transformedBook.coverUrl);
+        return transformedBook;
+      }) as Book[];
     },
     enabled: !!user,
   });
