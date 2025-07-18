@@ -28,7 +28,66 @@ interface EditBookModalProps {
   };
 }
 
+import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/hooks/useAuth';
+import { Star, StarOff } from 'lucide-react';
+import { toggleFavoriteBook } from '@/lib/favorite';
+
+interface EditBookModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  book: {
+    id: string;
+    book_id: string;
+    title: string;
+    author: string;
+    status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
+    dateStarted?: string;
+    dateFinished?: string;
+    notes?: string;
+    coverUrl?: string;
+  };
+}
+
 export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) => {
+  const [coverUrl, setCoverUrl] = useState(book.coverUrl);
+
+  useEffect(() => {
+    const fetchCover = async () => {
+      if (!coverUrl && book.title && book.author) {
+        try {
+          const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.coverUrl) {
+              setCoverUrl(data.coverUrl);
+              // Update the book in the database
+              await supabase
+                .from('books')
+                .update({ cover_url: data.coverUrl })
+                .eq('id', book.book_id); // Use book_id to update the books table
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching book cover:', error);
+        }
+      }
+    };
+
+    if (open) {
+      fetchCover();
+    }
+  }, [open, coverUrl, book.title, book.author, book.book_id]);
+
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     status: book.status,
@@ -207,7 +266,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-row items-start gap-4 mb-4">
             <img
-              src={book.coverUrl || '/placeholder.svg'}
+              src={coverUrl || '/placeholder.svg'}
               alt={book.title + ' cover'}
               className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
             />
