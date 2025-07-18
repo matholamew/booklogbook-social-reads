@@ -17,11 +17,12 @@ export interface Book {
 
 export const useUserBooks = () => {
   const { user } = useAuth();
-  console.log('useUserBooks hook called. User:', user); // Debug log to confirm hook usage
+  console.log('useUserBooks hook initiated. User authenticated:', !!user);
 
   return useQuery({
     queryKey: ['user-books', user?.id],
     queryFn: async () => {
+      console.log('queryFn started for user:', user?.id);
       if (!user) return [];
 
       const { data, error } = await supabase
