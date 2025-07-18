@@ -58,7 +58,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
     >
       <CardContent className="p-4 flex gap-4 items-start">
         <img
-          src={book.coverUrl || '/public/placeholder.svg'}
+          src={book.coverUrl || '/placeholder.svg'}
           alt={book.title + ' cover'}
           className="w-16 h-24 object-cover rounded shadow border border-slate-200 bg-white flex-shrink-0"
         />

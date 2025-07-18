@@ -211,7 +211,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
           <>
             <div className="flex flex-row items-start gap-4 mb-4">
               <img
-                src={book.cover_url || '/public/placeholder.svg'}
+                src={book.cover_url || '/placeholder.svg'}
                 alt={book.title + ' cover'}
                 className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
               />
