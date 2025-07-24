@@ -47,8 +47,9 @@ export const useUserBooks = () => {
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
-      console.log('Supabase user_books data:', data); // Debug log for cover_url troubleshooting
+      console.log('Supabase user_books data:', JSON.stringify(data, null, 2)); // Debug log for cover_url troubleshooting
       console.log('First book cover_image_url:', data?.[0]?.books?.cover_image_url); // Debug specific cover_image_url
+      console.log('First book structure:', JSON.stringify(data?.[0]?.books, null, 2)); // Debug book structure
 
       if (error) throw error;
 
