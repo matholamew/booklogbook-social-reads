@@ -38,7 +38,7 @@ export const useUserBooks = () => {
           books (
             id,
             title,
-            cover_url,
+            cover_image_url,
             authors (
               name
             )
@@ -48,7 +48,7 @@ export const useUserBooks = () => {
         .order('updated_at', { ascending: false });
 
       console.log('Supabase user_books data:', data); // Debug log for cover_url troubleshooting
-      console.log('First book cover_url:', data?.[0]?.books?.cover_url); // Debug specific cover_url
+      console.log('First book cover_image_url:', data?.[0]?.books?.cover_image_url); // Debug specific cover_image_url
 
       if (error) throw error;
 
@@ -66,7 +66,7 @@ export const useUserBooks = () => {
           notes: userBook.notes || '',
           updatedAt: userBook.updated_at,
           favorite: !!userBook.favorite,
-          coverUrl: userBook.books?.cover_url || '',
+          coverUrl: userBook.books?.cover_image_url || '',
         };
         return transformedBook;
       });

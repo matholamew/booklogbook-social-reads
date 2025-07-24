@@ -44,7 +44,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
               // Update the book in the database
               await supabase
                 .from('books')
-                .update({ cover_url: data.coverUrl })
+                .update({ cover_image_url: data.coverUrl })
                 .eq('id', book.id);
             }
           }
