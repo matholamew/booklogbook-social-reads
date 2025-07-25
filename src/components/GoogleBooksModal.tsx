@@ -15,8 +15,6 @@ interface GoogleBooksModalProps {
 
 export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps) => {
   const { user } = useAuth();
-  // Debug log for troubleshooting cover_url
-  console.log('GoogleBooksModal book object:', book);
   const [loading, setLoading] = useState(false);
   const [favorite, setFavorite] = useState<boolean>(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
