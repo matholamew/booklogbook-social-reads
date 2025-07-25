@@ -81,7 +81,7 @@ export const Header = () => {
             id: item.id,
             title: info.title,
             authors: info.authors || [],
-            coverUrl: info.imageLinks?.thumbnail || '',
+            coverUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
             description: info.description || '',
             pageCount: info.pageCount,
             publishedDate: info.publishedDate,

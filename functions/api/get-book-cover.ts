@@ -21,7 +21,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       throw new Error(`Google Books API responded with status ${response.status}`);
     }
     const data = await response.json();
-    const coverUrl = data.items?.[0]?.volumeInfo?.imageLinks?.thumbnail;
+    const coverUrl = data.items?.[0]?.volumeInfo?.imageLinks?.thumbnail?.replace('http://', 'https://');
 
     if (coverUrl) {
       return new Response(JSON.stringify({ coverUrl }), {
