@@ -47,19 +47,8 @@ export const useUserBooks = () => {
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false });
 
-      console.log('=== COVER URL DEBUG ===');
-      console.log('Raw Supabase data:', JSON.stringify(data, null, 2));
-      data?.forEach((item, index) => {
-        console.log(`Book ${index + 1}:`, {
-          title: item.books?.title,
-          cover_image_url: item.books?.cover_image_url,
-          bookId: item.books?.id
-        });
-      });
 
       if (error) throw error;
-
-    console.log('Supabase user_books data:', data); // Debug log for raw data
 
     // Map the data to a more usable format
       const mappedData = data.map((userBook: any) => {
@@ -75,8 +64,6 @@ export const useUserBooks = () => {
           favorite: !!userBook.favorite,
           coverUrl: userBook.books?.cover_image_url || '',
         };
-        console.log(`Mapping book "${transformedBook.title}": coverUrl="${transformedBook.coverUrl}"`);
         return transformedBook;
       });
-      console.log('Mapped data:', mappedData); // Debug log for mapped data
       return mappedData;

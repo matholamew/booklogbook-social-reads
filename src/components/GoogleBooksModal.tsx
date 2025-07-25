@@ -127,7 +127,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
         .insert({
           title: book.title,
           author_id: authorId,
-          cover_url: book.coverUrl,
+          cover_image_url: book.coverUrl,
           description: book.description,
           page_count: book.pageCount,
           published_date: book.publishedDate,
@@ -144,7 +144,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
           .insert({
             title: book.title,
             author_id: authorId,
-            cover_url: book.coverUrl,
+            cover_image_url: book.coverUrl,
             description: book.description,
             page_count: book.pageCount,
             published_date: book.publishedDate,

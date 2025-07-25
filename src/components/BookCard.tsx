@@ -30,7 +30,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export const BookCard = ({ book, onClick }: BookCardProps) => {
-  console.log('BookCard received book:', book.title, 'coverUrl:', book.coverUrl);
   const [coverUrl, setCoverUrl] = useState(book.coverUrl);
 
   useEffect(() => {
