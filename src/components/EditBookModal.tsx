@@ -36,12 +36,20 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   
   const [coverUrl, setCoverUrl] = useState(book.coverUrl);
 
+  // Update coverUrl when book prop changes
+  useEffect(() => {
+    if (book.coverUrl) {
+      setCoverUrl(book.coverUrl);
+    }
+  }, [book.coverUrl]);
+
   // Debug logging
   useEffect(() => {
     if (open) {
       console.log('EditBookModal - Book prop:', book);
       console.log('EditBookModal - coverUrl from prop:', book.coverUrl);
       console.log('EditBookModal - coverUrl state:', coverUrl);
+      console.log('EditBookModal - Final image src will be:', coverUrl || '/placeholder.svg');
     }
   }, [open, book, coverUrl]);
 
@@ -253,6 +261,11 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
               src={coverUrl || '/placeholder.svg'}
               alt={book.title + ' cover'}
               className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
+              onLoad={() => console.log('Image loaded successfully:', coverUrl)}
+              onError={(e) => {
+                console.log('Image failed to load:', coverUrl);
+                console.log('Error event:', e);
+              }}
             />
             <div className="flex flex-col justify-center">
               <div className="font-serif text-2xl text-slate-900 mb-2">{book.title}</div>

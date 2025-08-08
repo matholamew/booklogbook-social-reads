@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 
 export interface Book {
   id: string;
+  book_id: string;
   title: string;
   author: string;
   status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
@@ -54,6 +55,7 @@ export const useUserBooks = () => {
       const mappedData = data.map((userBook: any) => {
         const transformedBook = {
           id: userBook.id,
+          book_id: userBook.books?.id || '',
           title: userBook.books?.title || 'Unknown Title',
           author: userBook.books?.authors?.name || 'Unknown Author',
           status: userBook.status,
