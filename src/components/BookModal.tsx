@@ -24,9 +24,6 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   const [favoriteLoading, setFavoriteLoading] = useState(false);
   const queryClient = useQueryClient();
 
-  // Debug log for troubleshooting cover_url
-  console.log('BookModal book object:', book);
-
   // Fetch book info
   useEffect(() => {
     if (open && bookId) {
@@ -36,13 +33,43 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         .select('id, title, cover_image_url, authors (name)')
         .eq('id', bookId)
         .single()
-        .then(({ data }) => {
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Error fetching book:', error);
+          }
           setBook(data);
           setLoading(false);
+          
+          // If no cover image, try to fetch it from Google Books API
+          if (data && !data.cover_image_url && data.title && data.authors && typeof data.authors === 'object' && 'name' in data.authors) {
+            fetchBookCover(data.title, (data.authors as { name: string }).name, data.id);
+          }
         });
     }
     if (!open) setBook(null);
   }, [open, bookId]);
+
+  // Function to fetch book cover from Google Books API
+  const fetchBookCover = async (title: string, author: string, bookId: string) => {
+    try {
+      const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.coverUrl) {
+          // Update the book in the database
+          await supabase
+            .from('books')
+            .update({ cover_image_url: data.coverUrl })
+            .eq('id', bookId);
+          
+          // Update the local state
+          setBook(prev => prev ? { ...prev, cover_image_url: data.coverUrl } : null);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching book cover:', error);
+    }
+  };
 
   // Fetch favorite status for this user/book
   const fetchFavoriteStatus = async () => {
@@ -87,8 +114,6 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         userId: user.id,
         bookId,
         currentFavorite: favorite,
-        bookTitle: book.title,
-        bookAuthor: book.authors?.name,
       });
       console.log('Toggle favorite result:', result, errorMessage);
       if (result === 'favorited') {
