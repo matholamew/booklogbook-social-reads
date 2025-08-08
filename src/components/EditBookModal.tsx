@@ -29,6 +29,8 @@ interface EditBookModalProps {
 }
 
 export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) => {
+  console.log('EditBookModal - Component rendered, open:', open, 'book:', book);
+  
   const [coverUrl, setCoverUrl] = useState(book.coverUrl);
 
   // Debug logging

@@ -133,6 +133,8 @@ const Index = () => {
 
   const handleBookClick = (book) => {
     console.log('Index.tsx: handleBookClick - book data:', book);
+    console.log('Index.tsx: handleBookClick - book.coverUrl:', book.coverUrl);
+    console.log('Index.tsx: handleBookClick - book.coverUrl type:', typeof book.coverUrl);
     setSelectedBook(book);
     setEditModalOpen(true);
   };
