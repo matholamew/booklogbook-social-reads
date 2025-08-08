@@ -236,7 +236,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900 flex items-center gap-2">
-            Edit Book [DEBUG v2.1]
+            Edit Book
             {user && (
               <Button
                 type="button"
@@ -257,16 +257,21 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         ) : (
         <form onSubmit={handleSave} className="space-y-4">
           <div className="flex flex-row items-start gap-4 mb-4">
-            <img
-              src={coverUrl || '/placeholder.svg'}
-              alt={book.title + ' cover'}
-              className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
-              onLoad={() => console.log('Image loaded successfully:', coverUrl)}
-              onError={(e) => {
-                console.log('Image failed to load:', coverUrl);
-                console.log('Error event:', e);
-              }}
-            />
+            <div>
+              <img
+                src={coverUrl || '/placeholder.svg'}
+                alt={book.title + ' cover'}
+                className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
+                onLoad={() => console.log('Image loaded successfully:', coverUrl)}
+                onError={(e) => {
+                  console.log('Image failed to load:', coverUrl);
+                  console.log('Error event:', e);
+                }}
+              />
+              <div className="text-xs mt-1 text-gray-500 break-all">
+                Debug: {coverUrl ? `URL: ${coverUrl.substring(0, 50)}...` : 'No URL'}
+              </div>
+            </div>
             <div className="flex flex-col justify-center">
               <div className="font-serif text-2xl text-slate-900 mb-2">{book.title}</div>
               <div className="text-slate-700 mb-4">by {book.author}</div>
