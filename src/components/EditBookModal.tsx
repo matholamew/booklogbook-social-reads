@@ -29,7 +29,7 @@ interface EditBookModalProps {
 }
 
 export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) => {
-  console.log('=== EditBookModal RENDERED ===');
+  console.log('=== EditBookModal RENDERED === v2');
   console.log('open:', open);
   console.log('book:', book);
   console.log('book.coverUrl:', book?.coverUrl);
