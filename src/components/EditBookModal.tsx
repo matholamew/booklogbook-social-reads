@@ -28,38 +28,17 @@ interface EditBookModalProps {
   };
 }
 
-import { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { Star, StarOff } from 'lucide-react';
-import { toggleFavoriteBook } from '@/lib/favorite';
-
-interface EditBookModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  book: {
-    id: string;
-    book_id: string;
-    title: string;
-    author: string;
-    status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
-    dateStarted?: string;
-    dateFinished?: string;
-    notes?: string;
-    coverUrl?: string;
-  };
-}
-
 export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) => {
   const [coverUrl, setCoverUrl] = useState(book.coverUrl);
+
+  // Debug logging
+  useEffect(() => {
+    if (open) {
+      console.log('EditBookModal - Book prop:', book);
+      console.log('EditBookModal - coverUrl from prop:', book.coverUrl);
+      console.log('EditBookModal - coverUrl state:', coverUrl);
+    }
+  }, [open, book, coverUrl]);
 
   useEffect(() => {
     const fetchCover = async () => {
