@@ -28,6 +28,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   useEffect(() => {
     if (open && bookId) {
       setLoading(true);
+      console.log('BookModal - Fetching book with ID:', bookId);
       supabase
         .from('books')
         .select('id, title, cover_image_url, authors (name)')
@@ -37,11 +38,16 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
           if (error) {
             console.error('Error fetching book:', error);
           }
+          console.log('BookModal - Fetched book data:', data);
+          console.log('BookModal - cover_image_url value:', data?.cover_image_url);
+          console.log('BookModal - cover_image_url type:', typeof data?.cover_image_url);
+          console.log('BookModal - Full book object:', JSON.stringify(data, null, 2));
           setBook(data);
           setLoading(false);
           
           // If no cover image, try to fetch it from Google Books API
           if (data && !data.cover_image_url && data.title && data.authors && typeof data.authors === 'object' && 'name' in data.authors) {
+            console.log('BookModal - No cover image found, fetching from Google Books API');
             fetchBookCover(data.title, (data.authors as { name: string }).name, data.id);
           }
         });
@@ -209,6 +215,11 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
 
   if (!open || !bookId) return null;
 
+  // Debug log for image rendering
+  if (book) {
+    console.log('BookModal - Rendering image with src:', book.cover_image_url || '/placeholder.svg');
+  }
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
@@ -239,6 +250,8 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
                 src={book.cover_image_url || '/placeholder.svg'}
                 alt={book.title + ' cover'}
                 className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
+                onLoad={() => console.log('BookModal - Image loaded successfully:', book.cover_image_url)}
+                onError={(e) => console.log('BookModal - Image failed to load:', book.cover_image_url, e)}
               />
               <div className="flex flex-col justify-center">
                 <h2 className="font-serif text-2xl text-slate-900 mb-2">{book.title}</h2>
