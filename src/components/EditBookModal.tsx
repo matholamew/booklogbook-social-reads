@@ -236,7 +236,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl text-slate-900 flex items-center gap-2">
-            Edit Book
+            Edit Book [DEBUG v2.1]
             {user && (
               <Button
                 type="button"
