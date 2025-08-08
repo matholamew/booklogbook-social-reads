@@ -275,6 +275,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
             <div className="flex flex-col justify-center">
               <div className="font-serif text-2xl text-slate-900 mb-2">{book.title}</div>
               <div className="text-slate-700 mb-4">by {book.author}</div>
+              <div className="text-red-500 font-bold">DEPLOYMENT TEST v3</div>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4">
