@@ -18,12 +18,10 @@ export interface Book {
 
 export const useUserBooks = () => {
   const { user } = useAuth();
-  console.log('useUserBooks hook initiated. User authenticated:', !!user);
 
   return useQuery({
     queryKey: ['user-books', user?.id],
     queryFn: async () => {
-      console.log('queryFn started for user:', user?.id);
       if (!user) return [];
 
       const { data, error } = await supabase
@@ -51,7 +49,7 @@ export const useUserBooks = () => {
 
       if (error) throw error;
 
-    // Map the data to a more usable format
+      // Map the data to a more usable format
       const mappedData = data.map((userBook: any) => {
         const transformedBook = {
           id: userBook.id,
@@ -65,7 +63,16 @@ export const useUserBooks = () => {
           updatedAt: userBook.updated_at,
           favorite: !!userBook.favorite,
           coverUrl: userBook.books?.cover_image_url || '',
+          cover_image_url: userBook.books?.cover_image_url || '', // Add this for consistency
         };
         return transformedBook;
       });
       return mappedData;
+    },
+    enabled: !!user,
+  });
+};
+    },
+    enabled: !!user,
+  });
+};

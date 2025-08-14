@@ -29,33 +29,19 @@ interface EditBookModalProps {
 }
 
 export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) => {
-  console.log('=== EditBookModal RENDERED === v2');
-  console.log('open:', open);
-  console.log('book:', book);
-  console.log('book.coverUrl:', book?.coverUrl);
   
   const [coverUrl, setCoverUrl] = useState(book.coverUrl);
 
   // Update coverUrl when book prop changes
   useEffect(() => {
-    if (book.coverUrl) {
-      setCoverUrl(book.coverUrl);
+    if (book?.coverUrl || book?.cover_image_url) {
+      setCoverUrl(book.coverUrl || book.cover_image_url);
     }
-  }, [book.coverUrl]);
-
-  // Debug logging
-  useEffect(() => {
-    if (open) {
-      console.log('EditBookModal - Book prop:', book);
-      console.log('EditBookModal - coverUrl from prop:', book.coverUrl);
-      console.log('EditBookModal - coverUrl state:', coverUrl);
-      console.log('EditBookModal - Final image src will be:', coverUrl || '/placeholder.svg');
-    }
-  }, [open, book, coverUrl]);
+  }, [book?.coverUrl, book?.cover_image_url]);
 
   useEffect(() => {
     const fetchCover = async () => {
-      if (!coverUrl && book.title && book.author) {
+      if (!coverUrl && book?.title && book?.author) {
         try {
           const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author)}`);
           if (response.ok) {
@@ -66,7 +52,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
               await supabase
                 .from('books')
                 .update({ cover_image_url: data.coverUrl })
-                .eq('id', book.book_id); // Use book_id to update the books table
+                .eq('id', book?.book_id); // Use book_id to update the books table
             }
           }
         } catch (error) {
@@ -78,7 +64,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     if (open) {
       fetchCover();
     }
-  }, [open, coverUrl, book.title, book.author, book.book_id]);
+  }, [open, coverUrl, book?.title, book?.author, book?.book_id]);
 
   const { user } = useAuth();
   const [formData, setFormData] = useState({
@@ -123,7 +109,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       .from('user_books')
       .select('id, favorite')
       .eq('user_id', user.id)
-      .eq('book_id', book.book_id)
+      .eq('book_id', book?.book_id || '')
       .maybeSingle();
     if (error) {
       setFavorite(false);
@@ -137,7 +123,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
 
   // Subscribe to real-time updates for this user/book
   useEffect(() => {
-    if (!open || !user) return;
+    if (!open || !user || !book?.book_id) return;
     const sub = supabase
       .channel('user_books_favorite_realtime')
       .on(
@@ -146,7 +132,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
           event: '*',
           schema: 'public',
           table: 'user_books',
-          filter: `user_id=eq.${user.id},book_id=eq.${book.book_id}`,
+          filter: `user_id=eq.${user.id},book_id=eq.${book?.book_id}`,
         },
         (payload) => {
           // Refetch favorite status on any change
@@ -162,12 +148,12 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, book.book_id, user]);
+  }, [open, book?.book_id, user]);
 
   useEffect(() => {
     if (open) fetchFavoriteStatus();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, book.book_id, user]);
+  }, [open, book?.book_id, user]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,11 +173,11 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
           date_finished: formData.dateFinished || null,
           notes: formData.notes || null,
         })
-        .eq('id', book.id);
+        .eq('id', book?.id);
       if (updateError) throw updateError;
       toast({
         title: 'Book updated!',
-        description: `${book.title} has been updated.`
+        description: `${book?.title} has been updated.`
       });
       queryClient.invalidateQueries({ queryKey: ['user-books', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['activity-feed', user?.id] });
@@ -205,12 +191,12 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   };
 
   const handleToggleFavorite = async () => {
-    if (!user || !book.id) return;
+    if (!user || !book?.id) return;
     setFavoriteLoading(true);
     try {
       const { result, errorMessage } = await toggleFavoriteBook({
         userId: user.id,
-        bookId: book.book_id, // Use the book_id from the book object
+        bookId: book?.book_id || '', // Use the book_id from the book object
         currentFavorite: favorite,
       });
       if (result === 'favorited') {
@@ -260,32 +246,23 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
             <div>
               <img
                 src={coverUrl || '/placeholder.svg'}
-                alt={book.title + ' cover'}
+                alt={book?.title + ' cover'}
                 className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
-                onLoad={() => console.log('Image loaded successfully:', coverUrl)}
-                onError={(e) => {
-                  console.log('Image failed to load:', coverUrl);
-                  console.log('Error event:', e);
-                }}
               />
-              <div className="text-xs mt-1 text-gray-500 break-all">
-                Debug: {coverUrl ? `URL: ${coverUrl.substring(0, 50)}...` : 'No URL'}
-              </div>
             </div>
             <div className="flex flex-col justify-center">
-              <div className="font-serif text-2xl text-slate-900 mb-2">{book.title}</div>
-              <div className="text-slate-700 mb-4">by {book.author}</div>
-              <div className="text-red-500 font-bold">DEPLOYMENT TEST v3</div>
+              <div className="font-serif text-2xl text-slate-900 mb-2">{book?.title}</div>
+              <div className="text-slate-700 mb-4">by {book?.author}</div>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4">
             <div>
               <Label className="text-slate-800 font-medium">Title</Label>
-              <Input value={book.title} disabled className="mt-1 border-2 border-slate-300 text-slate-900 bg-slate-100" />
+              <Input value={book?.title || ''} disabled className="mt-1 border-2 border-slate-300 text-slate-900 bg-slate-100" />
             </div>
             <div>
               <Label className="text-slate-800 font-medium">Author</Label>
-              <Input value={book.author} disabled className="mt-1 border-2 border-slate-300 text-slate-900 bg-slate-100" />
+              <Input value={book?.author || ''} disabled className="mt-1 border-2 border-slate-300 text-slate-900 bg-slate-100" />
             </div>
             <div>
               <Label htmlFor="status" className="text-slate-800 font-medium">Reading Status</Label>

@@ -134,20 +134,13 @@ const Index = () => {
   // Debug logging for modal state
   useEffect(() => {
     if (selectedBook) {
-      console.log('=== selectedBook SET ===');
-      console.log('selectedBook:', selectedBook);
-      console.log('editModalOpen:', editModalOpen);
+      console.log('Selected book for editing:', selectedBook.title);
     }
   }, [selectedBook, editModalOpen]);
 
   const handleBookClick = (book) => {
-    console.log('=== handleBookClick CALLED ===');
-    console.log('book data:', book);
-    console.log('book.coverUrl:', book.coverUrl);
-    console.log('book.coverUrl type:', typeof book.coverUrl);
     setSelectedBook(book);
     setEditModalOpen(true);
-    console.log('editModalOpen set to true');
   };
 
   const handleOpenViewAll = (section: SectionType) => {
