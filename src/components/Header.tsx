@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
-import logo from '@/assets/logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -176,49 +175,49 @@ export const Header = () => {
 
 
   return (
-    <header className="bg-white border-b border-border shadow-sm sticky top-0 z-50" style={{ backgroundColor: '#fff' }}>
+    <header className="bg-card border-b border-border shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2 text-primary font-bold text-xl flex-shrink-0">
-            <img src={logo} alt="BookLogBook" className="h-8 w-8" />
-            <span className="font-serif text-slate-900">BookLogBook</span>
+            <img src="/logo.png" alt="BookLogBook" className="h-8 w-8" />
+            <span className="font-serif text-foreground">BookLogBook</span>
           </div>
 
           {/* Search */}
           <div className="w-24 sm:flex-1 sm:min-w-0 sm:max-w-md relative mx-2 flex-shrink">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               ref={searchInputRef}
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white border-2 border-slate-300 focus:bg-white focus:border-slate-800 transition-colors text-slate-900 placeholder:text-slate-600 w-full"
+              className="pl-10 bg-card border-2 border-input focus:border-primary transition-colors w-full"
               onFocus={() => searchQuery && setShowDropdown(true)}
               aria-label="Search books, authors, or friends"
               autoComplete="off"
             />
             {/* Search Dropdown */}
             {showDropdown && (
-              <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-300 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto" role="listbox">
+              <div className="absolute left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto" role="listbox">
                 {searchLoading ? (
-                  <div className="p-4 text-slate-600">Searching...</div>
+                  <div className="p-4 text-muted-foreground">Searching...</div>
                 ) : (
                   <>
                     {searchResults.books.length === 0 && searchResults.authors.length === 0 && searchResults.friends.length === 0 && searchResults.googleBooks.length === 0 ? (
-                      <div className="p-4 text-slate-600">No results found.</div>
+                      <div className="p-4 text-muted-foreground">No results found.</div>
                     ) : (
                       <>
                         {searchResults.books.length > 0 && (
                           <div>
-                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-slate-500 uppercase">Books</div>
+                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-muted-foreground uppercase">Books</div>
                             {searchResults.books.map((book: any, i: number) => {
                               const flatIdx = i;
                               const resultObj = { ...book, _type: 'book' };
                               return (
                                 <div
                                   key={book.id}
-                                  className={`px-4 py-2 hover:bg-slate-100 cursor-pointer text-slate-900 ${highlightedIndex === flatIdx ? 'bg-slate-200' : ''}`}
+                                  className={`px-4 py-2 hover:bg-muted cursor-pointer ${highlightedIndex === flatIdx ? 'bg-accent text-accent-foreground' : ''}`}
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onMouseDown={() => handleResultSelect(resultObj)}
@@ -232,14 +231,14 @@ export const Header = () => {
                         )}
                         {searchResults.authors.length > 0 && (
                           <div>
-                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-slate-500 uppercase">Authors</div>
+                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-muted-foreground uppercase">Authors</div>
                             {searchResults.authors.map((author: any, i: number) => {
                               const flatIdx = searchResults.books.length + i;
                               const resultObj = { ...author, _type: 'author' };
                               return (
                                 <div
                                   key={author.id}
-                                  className={`px-4 py-2 hover:bg-slate-100 cursor-pointer text-slate-900 ${highlightedIndex === flatIdx ? 'bg-slate-200' : ''}`}
+                                  className={`px-4 py-2 hover:bg-muted cursor-pointer ${highlightedIndex === flatIdx ? 'bg-accent text-accent-foreground' : ''}`}
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onMouseDown={() => handleResultSelect(resultObj)}
@@ -253,26 +252,26 @@ export const Header = () => {
                         )}
                         {searchResults.friends.length > 0 && (
                           <div>
-                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-slate-500 uppercase">Friends</div>
+                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-muted-foreground uppercase">Friends</div>
                             {searchResults.friends.map((friend: any, i: number) => {
                               const flatIdx = searchResults.books.length + searchResults.authors.length + i;
                               const resultObj = { ...friend, _type: 'friend' };
                               return (
                                 <div
                                   key={friend.id}
-                                  className={`px-4 py-2 hover:bg-slate-100 cursor-pointer flex items-center gap-2 text-slate-900 ${highlightedIndex === flatIdx ? 'bg-slate-200' : ''}`}
+                                  className={`px-4 py-2 hover:bg-muted cursor-pointer flex items-center gap-2 ${highlightedIndex === flatIdx ? 'bg-accent text-accent-foreground' : ''}`}
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onMouseDown={() => handleResultSelect(resultObj)}
                                   onMouseEnter={() => setHighlightedIndex(flatIdx)}
                                 >
                                   {friend.avatar_url ? (
-                                    <img src={friend.avatar_url} alt={friend.username} className="h-6 w-6 rounded-full object-cover border border-slate-300" />
+                                    <img src={friend.avatar_url} alt={friend.username} className="h-6 w-6 rounded-full object-cover border border-border" />
                                   ) : (
-                                    <span className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 border border-slate-300">{friend.display_name?.[0] || friend.username?.[0]}</span>
+                                    <span className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold border border-border">{friend.display_name?.[0] || friend.username?.[0]}</span>
                                   )}
                                   <span className="font-medium">{friend.display_name || friend.username}</span>
-                                  <span className="text-xs text-slate-500 ml-2">@{friend.username}</span>
+                                  <span className="text-xs text-muted-foreground ml-2">@{friend.username}</span>
                                 </div>
                               );
                             })}
@@ -280,13 +279,13 @@ export const Header = () => {
                         )}
                         {searchResults.googleBooks && searchResults.googleBooks.length > 0 && (
                           <div>
-                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-blue-500 uppercase">Google Books</div>
+                            <div className="px-4 pt-3 pb-1 text-xs font-semibold text-accent uppercase">Google Books</div>
                             {searchResults.googleBooks.map((book: any, i: number) => {
                               const flatIdx = searchResults.books.length + searchResults.authors.length + searchResults.friends.length + i;
                               return (
                                 <div
                                   key={book.id}
-                                  className={`px-4 py-2 hover:bg-slate-100 cursor-pointer text-slate-900 flex items-center gap-2 ${highlightedIndex === flatIdx ? 'bg-slate-200' : ''}`}
+                                  className={`px-4 py-2 hover:bg-muted cursor-pointer flex items-center gap-2 ${highlightedIndex === flatIdx ? 'bg-accent text-accent-foreground' : ''}`}
                                   role="option"
                                   aria-selected={highlightedIndex === flatIdx}
                                   onMouseDown={() => handleResultSelect(book)}
@@ -295,9 +294,9 @@ export const Header = () => {
                                   {book.coverUrl && <img src={book.coverUrl} alt={book.title + ' cover'} className="w-6 h-8 object-cover rounded mr-2" />}
                                   <span>{book.title}</span>
                                   {book.authors && book.authors.length > 0 && (
-                                    <span className="ml-2 text-xs text-slate-500">by {book.authors.join(', ')}</span>
+                                    <span className="ml-2 text-xs text-muted-foreground">by {book.authors.join(', ')}</span>
                                   )}
-                                  <span className="ml-auto text-xs text-blue-500">Google</span>
+                                  <span className="ml-auto text-xs text-accent">Google</span>
                                 </div>
                               );
                             })}
@@ -317,18 +316,18 @@ export const Header = () => {
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="p-2 text-slate-800 hover:text-slate-900 hover:bg-slate-200 border border-slate-300 hover:border-slate-400">
+                    <Button variant="ghost" size="sm" className="p-2">
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem className="text-slate-600">
+                    <DropdownMenuItem className="text-muted-foreground">
                       {user.email}
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setEditProfileOpen(true)} className="text-slate-900">
+                    <DropdownMenuItem onClick={() => setEditProfileOpen(true)}>
                       Edit Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={signOut} className="text-red-600">
+                    <DropdownMenuItem onClick={signOut} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign out
                     </DropdownMenuItem>
@@ -343,7 +342,7 @@ export const Header = () => {
               </>
             ) : (
               <Link to="/auth">
-                <Button variant="ghost" size="sm" className="p-2 text-slate-800 hover:text-slate-900 hover:bg-slate-200 border border-slate-300 hover:border-slate-400">
+                <Button variant="ghost" size="sm" className="p-2">
                   <User className="h-5 w-5" />
                 </Button>
               </Link>

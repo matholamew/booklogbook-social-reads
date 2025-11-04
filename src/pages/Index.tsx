@@ -164,8 +164,8 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-slate-600">Loading...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }
@@ -177,10 +177,10 @@ const Index = () => {
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* Welcome Section */}
         <div className="mb-8 pt-4 md:pt-6 lg:pt-[24px]">
-          <h1 className="text-3xl font-bold font-serif text-slate-900 mb-2">
+          <h1 className="text-3xl font-bold font-serif text-foreground mb-2">
             {user ? `Welcome back, ${userDisplayName}! 📚` : 'Track Your Reading Journey 📚'}
           </h1>
-          <p className="text-slate-800 text-lg">
+          <p className="text-foreground/80 text-lg">
             {user 
               ? 'Track your reading journey and discover what your friends are reading.'
               : 'Join BookLogBook to organize your reading, track progress, and connect with fellow book lovers.'
@@ -190,7 +190,6 @@ const Index = () => {
 
         {user ? (
           <>
-            {/* Stats Overview */}
             <div className="mb-8">
               <StatsOverview 
                 totalBooks={stats?.totalBooks}
@@ -204,11 +203,11 @@ const Index = () => {
               {/* Left Column - Book Sections */}
               <div className="lg:col-span-2 space-y-6">
                 {/* Currently Reading */}
-                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                <Card className="transition-all duration-300 hover:shadow-lg border-2">
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="font-serif text-slate-900">Currently Reading</CardTitle>
+                    <CardTitle className="font-serif">Currently Reading</CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-slate-200 text-slate-900 border border-slate-300">
+                      <Badge variant="secondary">
                         {readingBooks.length} books
                       </Badge>
                       {readingBooks.length > booksPerSection && (
@@ -216,7 +215,6 @@ const Index = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleOpenViewAll('reading')}
-                          className="text-slate-700 border-slate-300 hover:bg-slate-100"
                         >
                           View All
                         </Button>
@@ -225,7 +223,7 @@ const Index = () => {
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
-                      <div className="text-slate-600">Loading your books...</div>
+                      <div className="text-muted-foreground">Loading your books...</div>
                     ) : readingBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {readingBooks
@@ -235,17 +233,17 @@ const Index = () => {
                           ))}
                       </div>
                     ) : (
-                      <p className="text-slate-600">No books currently being read. Start reading something new!</p>
+                      <p className="text-muted-foreground">No books currently being read. Start reading something new!</p>
                     )}
                   </CardContent>
                 </Card>
 
                 {/* To Be Read */}
-                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                <Card className="transition-all duration-300 hover:shadow-lg border-2">
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="font-serif text-slate-900">To Be Read</CardTitle>
+                    <CardTitle className="font-serif">To Be Read</CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-white text-slate-900 border border-slate-400">
+                      <Badge variant="secondary">
                         {plannedBooks.length} books
                       </Badge>
                       {plannedBooks.length > booksPerSection && (
@@ -253,7 +251,6 @@ const Index = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleOpenViewAll('planned')}
-                          className="text-slate-700 border-slate-300 hover:bg-slate-100"
                         >
                           View All
                         </Button>
@@ -262,7 +259,7 @@ const Index = () => {
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
-                      <div className="text-slate-600">Loading your books...</div>
+                      <div className="text-muted-foreground">Loading your books...</div>
                     ) : plannedBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {plannedBooks
@@ -272,17 +269,17 @@ const Index = () => {
                           ))}
                       </div>
                     ) : (
-                      <p className="text-slate-600">No books in your reading list. Add some books you want to read!</p>
+                      <p className="text-muted-foreground">No books in your reading list. Add some books you want to read!</p>
                     )}
                   </CardContent>
                 </Card>
 
                 {/* Read */}
-                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                <Card className="transition-all duration-300 hover:shadow-lg border-2">
                   <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="font-serif text-slate-900">Read</CardTitle>
+                    <CardTitle className="font-serif">Read</CardTitle>
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="bg-slate-800 text-white border border-slate-800">
+                      <Badge variant="secondary" className="bg-primary text-primary-foreground">
                         {finishedBooks.length} books
                       </Badge>
                       {finishedBooks.length > booksPerSection && (
@@ -290,7 +287,6 @@ const Index = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleOpenViewAll('finished')}
-                          className="text-slate-700 border-slate-300 hover:bg-slate-100"
                         >
                           View All
                         </Button>
@@ -299,7 +295,7 @@ const Index = () => {
                   </CardHeader>
                   <CardContent>
                     {booksLoading ? (
-                      <div className="text-slate-600">Loading your books...</div>
+                      <div className="text-muted-foreground">Loading your books...</div>
                     ) : finishedBooks.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {finishedBooks
@@ -309,7 +305,7 @@ const Index = () => {
                           ))}
                       </div>
                     ) : (
-                      <p className="text-slate-600">No books completed yet. Keep reading!</p>
+                      <p className="text-muted-foreground">No books completed yet. Keep reading!</p>
                     )}
                   </CardContent>
                 </Card>
@@ -320,18 +316,18 @@ const Index = () => {
                 <ActivityFeed />
                 
                 {/* Quick Actions */}
-                <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50">
+                <Card className="transition-all duration-300 hover:shadow-lg border-2">
                   <CardHeader>
-                    <CardTitle className="text-lg font-serif text-slate-900">Quick Actions</CardTitle>
+                    <CardTitle className="text-lg font-serif">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
+                    <Button variant="outline" className="w-full justify-start">
                       <span>Browse Friends' Reading</span>
                     </Button>
-                    <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
+                    <Button variant="outline" className="w-full justify-start">
                       <span>Discover New Books</span>
                     </Button>
-                    <Button variant="outline" className="w-full justify-start text-slate-900 border-2 border-slate-400 hover:border-slate-600 bg-white hover:bg-slate-50">
+                    <Button variant="outline" className="w-full justify-start">
                       <span>View Reading Stats</span>
                     </Button>
                   </CardContent>
@@ -341,14 +337,14 @@ const Index = () => {
 
             {/* Section View All Modal */}
             <Dialog open={viewAllOpen} onOpenChange={setViewAllOpen}>
-              <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 border-slate-300 bg-white">
+              <DialogContent className="max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2">
                 <DialogHeader>
-                  <DialogTitle className="font-serif text-xl text-slate-900">
+                  <DialogTitle className="font-serif text-xl">
                     {getSectionTitle(currentSection)} - All Books
                   </DialogTitle>
                 </DialogHeader>
                 {booksLoading ? (
-                  <div className="text-slate-600">Loading your books...</div>
+                  <div className="text-muted-foreground">Loading your books...</div>
                 ) : currentSectionBooks.length > 0 ? (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -360,7 +356,7 @@ const Index = () => {
                     {totalPages > 1 && (
                       <div className="flex items-center justify-center gap-2 mt-4">
                         <button
-                          className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50 hover:bg-slate-50"
+                          className="p-2 rounded border disabled:opacity-50 hover:bg-muted"
                           onClick={() => setSectionPage(p => Math.max(1, p - 1))}
                           disabled={sectionPage === 1}
                           aria-label="Previous page"
@@ -370,7 +366,7 @@ const Index = () => {
                         {Array.from({ length: totalPages }, (_, i) => (
                           <button
                             key={i + 1}
-                            className={`px-3 py-1 rounded border ${sectionPage === i + 1 ? 'bg-slate-700 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-300 hover:bg-slate-50'}`}
+                            className={`px-3 py-1 rounded border ${sectionPage === i + 1 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}`}
                             onClick={() => setSectionPage(i + 1)}
                             aria-label={`Go to page ${i + 1}`}
                           >
@@ -378,7 +374,7 @@ const Index = () => {
                           </button>
                         ))}
                         <button
-                          className="p-2 rounded border border-slate-300 bg-white disabled:opacity-50 hover:bg-slate-50"
+                          className="p-2 rounded border disabled:opacity-50 hover:bg-muted"
                           onClick={() => setSectionPage(p => Math.min(totalPages, p + 1))}
                           disabled={sectionPage === totalPages}
                           aria-label="Next page"
@@ -389,7 +385,7 @@ const Index = () => {
                     )}
                   </>
                 ) : (
-                  <p className="text-slate-600">No books in this section.</p>
+                  <p className="text-muted-foreground">No books in this section.</p>
                 )}
               </DialogContent>
             </Dialog>
@@ -405,28 +401,28 @@ const Index = () => {
           <>
             {/* Features showcase for non-authenticated users */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50 text-center p-6">
-                <Book className="h-12 w-12 text-slate-700 mx-auto mb-4" />
-                <h3 className="text-lg font-serif text-slate-900 mb-2">Track Your Reading</h3>
-                <p className="text-slate-600">Keep a digital log of all the books you've read, are reading, or want to read.</p>
+              <Card className="transition-all duration-300 hover:shadow-lg border-2 text-center p-6">
+                <Book className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-serif mb-2">Track Your Reading</h3>
+                <p className="text-muted-foreground">Keep a digital log of all the books you've read, are reading, or want to read.</p>
               </Card>
               
-              <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50 text-center p-6">
-                <TrendingUp className="h-12 w-12 text-slate-700 mx-auto mb-4" />
-                <h3 className="text-lg font-serif text-slate-900 mb-2">Monitor Progress</h3>
-                <p className="text-slate-600">Set reading goals and track your progress throughout the year.</p>
+              <Card className="transition-all duration-300 hover:shadow-lg border-2 text-center p-6">
+                <TrendingUp className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-serif mb-2">Monitor Progress</h3>
+                <p className="text-muted-foreground">Set reading goals and track your progress throughout the year.</p>
               </Card>
               
-              <Card className="transition-all duration-300 hover:shadow-lg border-2 border-slate-300 bg-white hover:bg-slate-50 text-center p-6">
-                <Users className="h-12 w-12 text-slate-700 mx-auto mb-4" />
-                <h3 className="text-lg font-serif text-slate-900 mb-2">Connect with Readers</h3>
-                <p className="text-slate-600">Follow friends and family to see what they're reading and get recommendations.</p>
+              <Card className="transition-all duration-300 hover:shadow-lg border-2 text-center p-6">
+                <Users className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-serif mb-2">Connect with Readers</h3>
+                <p className="text-muted-foreground">Follow friends and family to see what they're reading and get recommendations.</p>
               </Card>
             </div>
 
             {/* Sample books preview */}
             <div className="mb-12">
-              <h2 className="text-2xl font-bold font-serif text-slate-900 mb-6">Sample Reading Journey</h2>
+              <h2 className="text-2xl font-bold font-serif mb-6">Sample Reading Journey</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {mockBooks.map(book => (
                   <BookCard key={book.id} book={book} />
@@ -436,10 +432,10 @@ const Index = () => {
 
             {/* Call to action */}
             <div className="text-center py-12">
-              <h2 className="text-3xl font-bold font-serif text-slate-900 mb-4">Ready to Start Your Reading Journey?</h2>
-              <p className="text-slate-700 mb-6 text-lg">Join thousands of readers who are already tracking their books with BookLogBook.</p>
+              <h2 className="text-3xl font-bold font-serif mb-4">Ready to Start Your Reading Journey?</h2>
+              <p className="text-foreground/80 mb-6 text-lg">Join thousands of readers who are already tracking their books with BookLogBook.</p>
               <Link to="/auth">
-                <Button className="bg-slate-700 hover:bg-slate-800 text-white px-8 py-3 text-lg">
+                <Button className="px-8 py-3 text-lg">
                   Get Started Today
                 </Button>
               </Link>
