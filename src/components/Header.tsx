@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
+import logo from '@/assets/logo.png';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -180,7 +181,7 @@ export const Header = () => {
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2 text-primary font-bold text-xl flex-shrink-0">
-            <Book className="h-6 w-6" />
+            <img src={logo} alt="BookLogBook" className="h-8 w-8" />
             <span className="font-serif text-slate-900">BookLogBook</span>
           </div>
 

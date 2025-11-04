@@ -25,6 +25,7 @@ interface EditBookModalProps {
     dateFinished?: string;
     notes?: string;
     coverUrl?: string;
+    cover_image_url?: string;
   };
 }
 
