@@ -94,24 +94,49 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
     
     setLoading(true);
     try {
-      const authorName = book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown Author';
+      // 1. Ensure author exists
+      let authorId = null;
+      const authorName = (book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown Author').trim().slice(0, 200);
       
-      // Use edge function for validated book/author creation
-      const { data: bookResult, error: bookError } = await supabase.functions.invoke('create-book', {
-        body: {
-          title: book.title,
-          author_name: authorName,
-          cover_url: book.coverUrl,
-          description: book.description,
-          page_count: book.pageCount,
-          published_date: book.publishedDate,
-          isbn: book.isbn,
-          google_books_url: book.googleBooksUrl,
-        }
-      });
+      const { data: authorData } = await supabase
+        .from('authors')
+        .select('id')
+        .eq('name', authorName)
+        .maybeSingle();
+      
+      if (authorData?.id) {
+        authorId = authorData.id;
+      } else {
+        const { data: newAuthor, error: authorInsertError } = await supabase
+          .from('authors')
+          .insert({ name: authorName })
+          .select('id')
+          .single();
+        if (authorInsertError) throw authorInsertError;
+        authorId = newAuthor.id;
+      }
 
+      // 2. Create book with validation
+      const bookInsertData: any = {
+        title: book.title?.trim().slice(0, 500) || 'Untitled',
+        author_id: authorId,
+      };
+      
+      if (book.coverUrl) bookInsertData.cover_url = book.coverUrl;
+      if (book.description) bookInsertData.description = book.description.slice(0, 10000);
+      if (book.pageCount && book.pageCount > 0 && book.pageCount < 100000) bookInsertData.page_count = book.pageCount;
+      if (book.publishedDate) bookInsertData.published_date = book.publishedDate;
+      if (book.isbn) bookInsertData.isbn = book.isbn.slice(0, 20);
+      if (book.googleBooksUrl) bookInsertData.google_books_url = book.googleBooksUrl;
+      
+      const { data: newBook, error: bookError } = await supabase
+        .from('books')
+        .insert(bookInsertData)
+        .select('id')
+        .single();
+      
       if (bookError) throw bookError;
-      const bookId = bookResult.book_id;
+      const bookId = newBook.id;
 
       // 3. Add to user_books if not already present
       const { data: userBook, error: userBookFetchError } = await supabase

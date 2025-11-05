@@ -140,19 +140,44 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   const handleAddToLibrary = async () => {
     if (!user || !bookId || !book) return;
     try {
-      // Use edge function for validated book/author creation
-      let realBookId = bookId;
+      // 1. Ensure author exists
+      let authorId = null;
+      if (book.authors?.name) {
+        const { data: authorData } = await supabase
+          .from('authors')
+          .select('id')
+          .eq('name', book.authors.name)
+          .maybeSingle();
+        
+        if (authorData?.id) {
+          authorId = authorData.id;
+        } else {
+          const { data: newAuthor, error: authorInsertError } = await supabase
+            .from('authors')
+            .insert({ name: book.authors.name.trim().slice(0, 200) })
+            .select('id')
+            .single();
+          if (authorInsertError) throw authorInsertError;
+          authorId = newAuthor.id;
+        }
+      }
       
-      if (book.authors?.name && book.title) {
-        const { data: bookResult, error: bookError } = await supabase.functions.invoke('create-book', {
-          body: {
-            title: book.title,
-            author_name: book.authors.name,
-          }
-        });
-
-        if (bookError) throw bookError;
-        realBookId = bookResult.book_id;
+      // 2. Ensure book exists
+      let realBookId = bookId;
+      const { data: bookData } = await supabase
+        .from('books')
+        .select('id')
+        .eq('id', bookId)
+        .maybeSingle();
+      
+      if (!bookData && book.title && authorId) {
+        const { data: newBook, error: bookInsertError } = await supabase
+          .from('books')
+          .insert({ title: book.title.trim().slice(0, 500), author_id: authorId })
+          .select('id')
+          .single();
+        if (bookInsertError) throw bookInsertError;
+        realBookId = newBook.id;
       }
       // 3. Add to user_books if not already present
       const { data: userBook, error: userBookFetchError } = await supabase
