@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
 import { toggleFavoriteBook } from '@/lib/favorite';
+import { bookUpdateSchema } from '@/lib/validation';
 
 interface EditBookModalProps {
   open: boolean;
@@ -49,11 +50,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
             const data = await response.json();
             if (data.coverUrl) {
               setCoverUrl(data.coverUrl);
-              // Update the book in the database
-              await supabase
-                .from('books')
-                .update({ cover_url: data.coverUrl })
-                .eq('id', book?.book_id); // Use book_id to update the books table
+              // Note: Cannot update database - UPDATE policy removed for data integrity
             }
           }
         } catch (error) {
@@ -159,20 +156,30 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Validate input using zod schema
+    const validationResult = bookUpdateSchema.safeParse(formData);
+    if (!validationResult.success) {
+      setError(validationResult.error.errors[0].message);
+      return;
+    }
+
     // Validation: require both dates if status is finished or did_not_finish
     if ((formData.status === 'finished' || formData.status === 'did_not_finish') && (!formData.dateStarted || !formData.dateFinished)) {
       setError('Both Date Started and Date Finished are required when marking a book as Read.');
       return;
     }
+
+    const validatedData = validationResult.data;
     setLoading(true);
     try {
       const { error: updateError } = await supabase
         .from('user_books')
         .update({
-          status: formData.status,
-          date_started: formData.dateStarted || null,
-          date_finished: formData.dateFinished || null,
-          notes: formData.notes || null,
+          status: validatedData.status,
+          date_started: validatedData.dateStarted || null,
+          date_finished: validatedData.dateFinished || null,
+          notes: validatedData.notes || null,
         })
         .eq('id', book?.id);
       if (updateError) throw updateError;

@@ -10,6 +10,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
+import { bookInputSchema } from '@/lib/validation';
 
 export const AddBookButton = () => {
   const [open, setOpen] = useState(false);
@@ -29,19 +30,25 @@ export const AddBookButton = () => {
     e.preventDefault();
     setError('');
 
-    if (!formData.title || !formData.author) {
-      setError("Please fill in both title and author.");
-      return;
-    }
     if (!user) {
       setError("You must be logged in to add a book.");
       return;
     }
+
+    // Validate input using zod schema
+    const validationResult = bookInputSchema.safeParse(formData);
+    if (!validationResult.success) {
+      setError(validationResult.error.errors[0].message);
+      return;
+    }
+
     // Validation: require both dates if status is finished or did_not_finish
     if ((formData.status === 'finished' || formData.status === 'did_not_finish') && (!formData.dateStarted || !formData.dateFinished)) {
       setError('Both Date Started and Date Finished are required when marking a book as Read.');
       return;
     }
+
+    const validatedData = validationResult.data;
 
     try {
       // 1. Check or insert author
@@ -55,7 +62,7 @@ export const AddBookButton = () => {
       if (!author_id) {
         const { data: newAuthor, error: insertAuthorError } = await supabase
           .from('authors')
-          .insert({ name: formData.author.trim().slice(0, 200) })
+          .insert({ name: validatedData.author })
           .select('id')
           .single();
         if (insertAuthorError) throw insertAuthorError;
@@ -66,7 +73,7 @@ export const AddBookButton = () => {
       let { data: bookData } = await supabase
         .from('books')
         .select('id')
-        .eq('title', formData.title)
+        .eq('title', validatedData.title)
         .eq('author_id', author_id)
         .maybeSingle();
       
@@ -74,7 +81,7 @@ export const AddBookButton = () => {
       if (!book_id) {
         const { data: newBook, error: insertBookError } = await supabase
           .from('books')
-          .insert({ title: formData.title.trim().slice(0, 500), author_id })
+          .insert({ title: validatedData.title, author_id })
           .select('id')
           .single();
         if (insertBookError) throw insertBookError;
@@ -106,21 +113,7 @@ export const AddBookButton = () => {
         });
       if (insertUserBookError) throw insertUserBookError;
 
-      // 5. Fetch cover image from Google Books
-      try {
-        const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(formData.title)}&author=${encodeURIComponent(formData.author)}`);
-        if (response.ok) {
-          const { coverUrl } = await response.json();
-          if (coverUrl) {
-            await supabase
-              .from('books')
-              .update({ cover_url: coverUrl })
-              .eq('id', book_id);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch cover:', error);
-      }
+      // Note: Cover fetching removed - UPDATE policy dropped for data integrity
 
       toast({
         title: "Book Added!",

@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { profileUpdateSchema } from '@/lib/validation';
 
 interface ProfileEditModalProps {
   open: boolean;
@@ -75,39 +76,33 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     setError('');
     
     try {
-      // Client-side validation
-      if (username && username.length < 3) {
-        setError('Username must be at least 3 characters');
-        return;
-      }
-      if (username && username.length > 30) {
-        setError('Username must be less than 30 characters');
-        return;
-      }
-      if (username && !/^[a-zA-Z0-9_-]+$/.test(username)) {
-        setError('Username can only contain letters, numbers, underscores, and hyphens');
-        return;
-      }
-      if (displayName && displayName.length > 100) {
-        setError('Display name must be less than 100 characters');
-        return;
-      }
-      if (bio && bio.length > 500) {
-        setError('Bio must be less than 500 characters');
+      // Validate input using zod schema
+      const validationResult = profileUpdateSchema.safeParse({
+        username,
+        display_name: displayName,
+        bio,
+      });
+      
+      if (!validationResult.success) {
+        setError(validationResult.error.errors[0].message);
+        setLoading(false);
         return;
       }
 
+      const validatedData = validationResult.data;
+
       // Check if username is taken by another user
-      if (username && user) {
+      if (validatedData.username && user) {
         const { data: existingProfile } = await supabase
           .from('profiles')
           .select('id')
-          .eq('username', username)
+          .eq('username', validatedData.username)
           .neq('id', user.id)
           .maybeSingle();
 
         if (existingProfile) {
           setError('Username already taken');
+          setLoading(false);
           return;
         }
       }
@@ -116,9 +111,9 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          username: username?.trim() || null,
-          display_name: displayName?.trim() || null,
-          bio: bio?.trim() || null,
+          username: validatedData.username || null,
+          display_name: validatedData.display_name || null,
+          bio: validatedData.bio || null,
           avatar_url: avatarUrl || null,
         })
         .eq('id', user?.id);

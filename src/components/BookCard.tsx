@@ -41,11 +41,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
             const data = await response.json();
             if (data.coverUrl) {
               setCoverUrl(data.coverUrl);
-              // Update the book in the database
-              await supabase
-                .from('books')
-                .update({ cover_url: data.coverUrl })
-                .eq('id', book.id);
+              // Note: Cannot update database - UPDATE policy removed for data integrity
             }
           }
         } catch (error) {
