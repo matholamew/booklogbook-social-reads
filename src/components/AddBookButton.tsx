@@ -44,40 +44,16 @@ export const AddBookButton = () => {
     }
 
     try {
-      // 1. Check or insert author
-      let { data: authorData, error: authorError } = await supabase
-        .from('authors')
-        .select('id')
-        .eq('name', formData.author)
-        .single();
-      let author_id = authorData?.id;
-      if (!author_id) {
-        const { data: newAuthor, error: insertAuthorError } = await supabase
-          .from('authors')
-          .insert({ name: formData.author })
-          .select('id')
-          .single();
-        if (insertAuthorError) throw insertAuthorError;
-        author_id = newAuthor.id;
-      }
+      // Use edge function for validated book/author creation
+      const { data: bookResult, error: bookError } = await supabase.functions.invoke('create-book', {
+        body: {
+          title: formData.title,
+          author_name: formData.author,
+        }
+      });
 
-      // 2. Check or insert book
-      let { data: bookData, error: bookError } = await supabase
-        .from('books')
-        .select('id')
-        .eq('title', formData.title)
-        .eq('author_id', author_id)
-        .single();
-      let book_id = bookData?.id;
-      if (!book_id) {
-        const { data: newBook, error: insertBookError } = await supabase
-          .from('books')
-          .insert({ title: formData.title, author_id })
-          .select('id')
-          .single();
-        if (insertBookError) throw insertBookError;
-        book_id = newBook.id;
-      }
+      if (bookError) throw bookError;
+      const book_id = bookResult.book_id;
 
       // 3. Check if user already has this book
       const { data: userBookData, error: userBookError } = await supabase

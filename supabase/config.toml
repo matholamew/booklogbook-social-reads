@@ -14,3 +14,8 @@ entrypoint = "./functions/update-books/index.ts"
 enabled = true
 verify_jwt = true
 entrypoint = "./functions/validate-profile/index.ts"
+
+[functions.create-book]
+enabled = true
+verify_jwt = true
+entrypoint = "./functions/create-book/index.ts"
