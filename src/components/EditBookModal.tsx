@@ -52,7 +52,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
               // Update the book in the database
               await supabase
                 .from('books')
-                .update({ cover_image_url: data.coverUrl })
+                .update({ cover_url: data.coverUrl })
                 .eq('id', book?.book_id); // Use book_id to update the books table
             }
           }

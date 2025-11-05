@@ -106,6 +106,22 @@ export const AddBookButton = () => {
         });
       if (insertUserBookError) throw insertUserBookError;
 
+      // 5. Fetch cover image from Google Books
+      try {
+        const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(formData.title)}&author=${encodeURIComponent(formData.author)}`);
+        if (response.ok) {
+          const { coverUrl } = await response.json();
+          if (coverUrl) {
+            await supabase
+              .from('books')
+              .update({ cover_url: coverUrl })
+              .eq('id', book_id);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch cover:', error);
+      }
+
       toast({
         title: "Book Added!",
         description: `${formData.title} has been added to your library.`

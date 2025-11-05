@@ -17,6 +17,7 @@ export const useUserBooks = () => {
           books (
             id,
             title,
+            cover_url,
             authors (
               id,
               name
@@ -39,8 +40,8 @@ export const useUserBooks = () => {
         rating: userBook.rating,
         notes: userBook.notes,
         isFavorite: userBook.is_favorite,
-        coverUrl: userBook.cover_url,
-        cover_image_url: userBook.cover_url, // For backward compatibility
+        coverUrl: userBook.books?.cover_url || null,
+        cover_image_url: userBook.books?.cover_url || null, // For backward compatibility
         updatedAt: userBook.updated_at,
         createdAt: userBook.created_at,
       }));
