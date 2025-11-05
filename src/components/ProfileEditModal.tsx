@@ -73,21 +73,57 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     e.preventDefault();
     setLoading(true);
     setError('');
+    
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke('validate-profile', {
-        body: {
-          username: username || null,
-          display_name: displayName || null,
-          bio: bio || null,
-          avatar_url: avatarUrl || null,
-        }
-      });
-
-      if (invokeError) throw invokeError;
-      if (data?.error) {
-        setError(data.error);
+      // Client-side validation
+      if (username && username.length < 3) {
+        setError('Username must be at least 3 characters');
         return;
       }
+      if (username && username.length > 30) {
+        setError('Username must be less than 30 characters');
+        return;
+      }
+      if (username && !/^[a-zA-Z0-9_-]+$/.test(username)) {
+        setError('Username can only contain letters, numbers, underscores, and hyphens');
+        return;
+      }
+      if (displayName && displayName.length > 100) {
+        setError('Display name must be less than 100 characters');
+        return;
+      }
+      if (bio && bio.length > 500) {
+        setError('Bio must be less than 500 characters');
+        return;
+      }
+
+      // Check if username is taken by another user
+      if (username && user) {
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', username)
+          .neq('id', user.id)
+          .maybeSingle();
+
+        if (existingProfile) {
+          setError('Username already taken');
+          return;
+        }
+      }
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          username: username?.trim() || null,
+          display_name: displayName?.trim() || null,
+          bio: bio?.trim() || null,
+          avatar_url: avatarUrl || null,
+        })
+        .eq('id', user?.id);
+
+      if (updateError) throw updateError;
 
       toast({ title: 'Profile updated!', description: 'Your profile has been updated.' });
       onOpenChange(false);

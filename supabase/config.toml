@@ -1,5 +1,1 @@
 
-[functions.validate-profile]
-enabled = true
-verify_jwt = true
-entrypoint = "./functions/validate-profile/index.ts"
