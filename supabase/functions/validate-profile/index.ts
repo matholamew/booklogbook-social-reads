@@ -7,18 +7,9 @@ const corsHeaders = {
 };
 
 const profileSchema = z.object({
-  username: z.string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(32, 'Username must be less than 32 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
-  display_name: z.string()
-    .max(64, 'Display name must be less than 64 characters')
-    .optional()
-    .nullable(),
-  bio: z.string()
-    .max(256, 'Bio must be less than 256 characters')
-    .optional()
-    .nullable(),
+  username: z.string().trim().min(3, 'Username must be at least 3 characters').max(30, 'Username must be less than 30 characters').regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
+  display_name: z.string().trim().max(100, 'Display name must be less than 100 characters').optional().nullable(),
+  bio: z.string().max(500, 'Bio must be less than 500 characters').optional().nullable(),
   avatar_url: z.string().url('Invalid avatar URL').optional().nullable(),
 });
 
@@ -31,57 +22,39 @@ Deno.serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    if (userError || !user) {
+      console.error('Auth error:', userError);
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     const body = await req.json();
-    
-    // Validate input
-    const validationResult = profileSchema.safeParse(body);
-    
-    if (!validationResult.success) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Validation failed', 
-          details: validationResult.error.errors 
-        }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    console.log('Received profile update request for user:', user.id);
 
-    const { username, display_name, bio, avatar_url } = validationResult.data;
+    const validatedData = profileSchema.parse(body);
+    console.log('Validated profile data:', validatedData);
 
-    // Check username uniqueness if provided
-    if (username) {
-      const { data: existing, error: checkError } = await supabaseClient
+    // Check if username is already taken by another user
+    if (validatedData.username) {
+      const { data: existingProfile } = await supabaseClient
         .from('profiles')
         .select('id')
-        .eq('username', username)
+        .eq('username', validatedData.username)
         .neq('id', user.id)
         .maybeSingle();
 
-      if (checkError) {
-        throw checkError;
-      }
-
-      if (existing) {
-        return new Response(
-          JSON.stringify({ error: 'Username is already taken' }),
-          { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+      if (existingProfile) {
+        console.log('Username already taken:', validatedData.username);
+        return new Response(JSON.stringify({ error: 'Username already taken' }), {
+          status: 409,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
     }
 
@@ -89,25 +62,45 @@ Deno.serve(async (req) => {
     const { error: updateError } = await supabaseClient
       .from('profiles')
       .update({
-        username: username || null,
-        display_name: display_name || null,
-        bio: bio || null,
-        avatar_url: avatar_url || null,
+        username: validatedData.username,
+        display_name: validatedData.display_name,
+        bio: validatedData.bio,
+        avatar_url: validatedData.avatar_url,
       })
       .eq('id', user.id);
 
     if (updateError) {
-      throw updateError;
+      console.error('Error updating profile:', updateError);
+      throw new Error('Failed to update profile');
     }
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.log('Profile updated successfully for user:', user.id);
+
+    return new Response(JSON.stringify({ 
+      message: 'Profile updated successfully'
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
   } catch (error) {
-    return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    if (error instanceof z.ZodError) {
+      console.error('Validation error:', error.errors);
+      return new Response(JSON.stringify({ 
+        error: 'Validation failed',
+        details: error.errors 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.error('Server error:', error);
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : 'Internal server error' 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
