@@ -1,15 +1,4 @@
 
-[functions.get-google-book]
-enabled = true
-verify_jwt = false
-import_map = "./functions/get-google-book/deno.json"
-entrypoint = "./functions/get-google-book/index.ts"
-
-[functions.update-books]
-enabled = true
-verify_jwt = false
-entrypoint = "./functions/update-books/index.ts"
-
 [functions.validate-profile]
 enabled = true
 verify_jwt = true
