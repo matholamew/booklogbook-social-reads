@@ -11,5 +11,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
   }
 })
-
-console.log('Supabase client initialized:', { supabaseUrl, hasKey: !!supabaseAnonKey })

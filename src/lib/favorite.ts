@@ -29,7 +29,6 @@ export async function toggleFavoriteBook({
     .maybeSingle();
 
   if (fetchError) {
-    console.error('toggleFavoriteBook fetch error:', fetchError);
     return { result: 'error', errorMessage: fetchError.message };
   }
 
@@ -42,7 +41,6 @@ export async function toggleFavoriteBook({
         .update({ favorite: true })
         .eq('id', userBook.id);
       if (updateError) {
-        console.error('toggleFavoriteBook update error:', updateError);
         return { result: 'error', errorMessage: updateError.message };
       }
       return { result: 'favorited' };
@@ -56,7 +54,6 @@ export async function toggleFavoriteBook({
         .delete()
         .eq('id', userBook.id);
       if (deleteError) {
-        console.error('toggleFavoriteBook delete error:', deleteError);
         return { result: 'error', errorMessage: deleteError.message };
       }
       return { result: 'removed' };
@@ -67,7 +64,6 @@ export async function toggleFavoriteBook({
         .update({ favorite: false })
         .eq('id', userBook.id);
       if (updateError) {
-        console.error('toggleFavoriteBook update error:', updateError);
         return { result: 'error', errorMessage: updateError.message };
       }
       return { result: 'unfavorited' };
@@ -85,7 +81,6 @@ export async function toggleFavoriteBook({
     });
 
   if (insertError) {
-    console.error('toggleFavoriteBook user_books insert error:', insertError);
     return { result: 'error', errorMessage: insertError.message };
   }
 

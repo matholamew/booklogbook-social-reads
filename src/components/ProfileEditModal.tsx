@@ -56,7 +56,7 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     setError('');
     try {
       const ext = file.name.split('.').pop();
-      const path = `avatars/${user.id}.${ext}`;
+      const path = `${user.id}/${user.id}.${ext}`;
       const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
       if (uploadError) throw uploadError;
       const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(path);
@@ -74,29 +74,21 @@ export const ProfileEditModal = ({ open, onOpenChange }: ProfileEditModalProps) 
     setLoading(true);
     setError('');
     try {
-      if (username) {
-        const { data: existing, error: checkError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('username', username)
-          .neq('id', user.id);
-        if (checkError) throw checkError;
-        if (existing && existing.length > 0) {
-          setError('Username is already taken.');
-          setLoading(false);
-          return;
-        }
-      }
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
+      const { data, error: invokeError } = await supabase.functions.invoke('validate-profile', {
+        body: {
           username: username || null,
           display_name: displayName || null,
           bio: bio || null,
           avatar_url: avatarUrl || null,
-        })
-        .eq('id', user.id);
-      if (updateError) throw updateError;
+        }
+      });
+
+      if (invokeError) throw invokeError;
+      if (data?.error) {
+        setError(data.error);
+        return;
+      }
+
       toast({ title: 'Profile updated!', description: 'Your profile has been updated.' });
       onOpenChange(false);
     } catch (err: any) {
