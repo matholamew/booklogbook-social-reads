@@ -60,18 +60,21 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string | null
+          created_by: string | null
           id: string
           name: string
         }
         Insert: {
           bio?: string | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
           name: string
         }
         Update: {
           bio?: string | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
           name?: string
         }
@@ -82,6 +85,7 @@ export type Database = {
           author_id: string | null
           cover_url: string | null
           created_at: string | null
+          created_by: string | null
           description: string | null
           google_books_url: string | null
           id: string
@@ -95,6 +99,7 @@ export type Database = {
           author_id?: string | null
           cover_url?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           google_books_url?: string | null
           id?: string
@@ -108,6 +113,7 @@ export type Database = {
           author_id?: string | null
           cover_url?: string | null
           created_at?: string | null
+          created_by?: string | null
           description?: string | null
           google_books_url?: string | null
           id?: string
@@ -247,6 +253,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -254,6 +281,13 @@ export type Database = {
     Functions: {
       bytea_to_text: { Args: { data: string }; Returns: string }
       debug_google_books: { Args: never; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       http: {
         Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
         Returns: Database["public"]["CompositeTypes"]["http_response"]
@@ -398,6 +432,7 @@ export type Database = {
     }
     Enums: {
       activity_type: "started" | "finished" | "noted" | "added"
+      app_role: "admin" | "moderator" | "user"
       reading_status: "reading" | "finished" | "planned" | "did_not_finish"
     }
     CompositeTypes: {
@@ -543,6 +578,7 @@ export const Constants = {
   public: {
     Enums: {
       activity_type: ["started", "finished", "noted", "added"],
+      app_role: ["admin", "moderator", "user"],
       reading_status: ["reading", "finished", "planned", "did_not_finish"],
     },
   },

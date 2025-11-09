@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { authorInputSchema, bookInputSchema } from '@/lib/validation';
 
 interface GoogleBooksModalProps {
   open: boolean;
@@ -94,14 +95,15 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
     
     setLoading(true);
     try {
-      // 1. Ensure author exists
-      let authorId = null;
-      const authorName = (book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown Author').trim().slice(0, 200);
+      // 1. Validate and ensure author exists
+      const authorName = book.authors && book.authors.length > 0 ? book.authors[0] : 'Unknown Author';
+      const validatedAuthor = authorInputSchema.parse({ name: authorName });
       
+      let authorId = null;
       const { data: authorData } = await supabase
         .from('authors')
         .select('id')
-        .eq('name', authorName)
+        .eq('name', validatedAuthor.name)
         .maybeSingle();
       
       if (authorData?.id) {
@@ -109,24 +111,31 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
       } else {
         const { data: newAuthor, error: authorInsertError } = await supabase
           .from('authors')
-          .insert({ name: authorName })
+          .insert({ name: validatedAuthor.name, created_by: user.id })
           .select('id')
           .single();
         if (authorInsertError) throw authorInsertError;
         authorId = newAuthor.id;
       }
 
-      // 2. Create book with validation
+      // 2. Validate book data
+      const validatedBook = bookInputSchema.parse({
+        title: book.title || 'Untitled',
+        author: validatedAuthor.name
+      });
+
+      // 3. Create book with validated data
       const bookInsertData: any = {
-        title: book.title?.trim().slice(0, 500) || 'Untitled',
+        title: validatedBook.title,
         author_id: authorId,
+        created_by: user.id,
       };
       
       if (book.coverUrl) bookInsertData.cover_url = book.coverUrl;
-      if (book.description) bookInsertData.description = book.description.slice(0, 10000);
+      if (book.description) bookInsertData.description = book.description.substring(0, 10000);
       if (book.pageCount && book.pageCount > 0 && book.pageCount < 100000) bookInsertData.page_count = book.pageCount;
       if (book.publishedDate) bookInsertData.published_date = book.publishedDate;
-      if (book.isbn) bookInsertData.isbn = book.isbn.slice(0, 20);
+      if (book.isbn) bookInsertData.isbn = book.isbn.substring(0, 20);
       if (book.googleBooksUrl) bookInsertData.google_books_url = book.googleBooksUrl;
       
       const { data: newBook, error: bookError } = await supabase

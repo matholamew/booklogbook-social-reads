@@ -7,6 +7,7 @@ import { Star, StarOff } from 'lucide-react';
 import { toggleFavoriteBook } from '@/lib/favorite';
 import { toast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
+import { authorInputSchema, bookInputSchema } from '@/lib/validation';
 
 interface BookModalProps {
   open: boolean;
@@ -143,10 +144,13 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
       // 1. Ensure author exists
       let authorId = null;
       if (book.authors?.name) {
+        // Validate author name
+        const validatedAuthor = authorInputSchema.parse({ name: book.authors.name });
+        
         const { data: authorData } = await supabase
           .from('authors')
           .select('id')
-          .eq('name', book.authors.name)
+          .eq('name', validatedAuthor.name)
           .maybeSingle();
         
         if (authorData?.id) {
@@ -154,7 +158,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         } else {
           const { data: newAuthor, error: authorInsertError } = await supabase
             .from('authors')
-            .insert({ name: book.authors.name.trim().slice(0, 200) })
+            .insert({ name: validatedAuthor.name, created_by: user.id })
             .select('id')
             .single();
           if (authorInsertError) throw authorInsertError;
@@ -171,9 +175,19 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         .maybeSingle();
       
       if (!bookData && book.title && authorId) {
+        // Validate book data
+        const validatedBook = bookInputSchema.parse({ 
+          title: book.title, 
+          author: book.authors?.name || 'Unknown'
+        });
+        
         const { data: newBook, error: bookInsertError } = await supabase
           .from('books')
-          .insert({ title: book.title.trim().slice(0, 500), author_id: authorId })
+          .insert({ 
+            title: validatedBook.title, 
+            author_id: authorId,
+            created_by: user.id
+          })
           .select('id')
           .single();
         if (bookInsertError) throw bookInsertError;

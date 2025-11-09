@@ -62,7 +62,7 @@ export const AddBookButton = () => {
       if (!author_id) {
         const { data: newAuthor, error: insertAuthorError } = await supabase
           .from('authors')
-          .insert({ name: validatedData.author })
+          .insert({ name: validatedData.author, created_by: user.id })
           .select('id')
           .single();
         if (insertAuthorError) throw insertAuthorError;
@@ -81,7 +81,7 @@ export const AddBookButton = () => {
       if (!book_id) {
         const { data: newBook, error: insertBookError } = await supabase
           .from('books')
-          .insert({ title: validatedData.title, author_id })
+          .insert({ title: validatedData.title, author_id, created_by: user.id })
           .select('id')
           .single();
         if (insertBookError) throw insertBookError;
