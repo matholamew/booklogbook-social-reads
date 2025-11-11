@@ -79,9 +79,27 @@ export const AddBookButton = () => {
       
       let book_id = bookData?.id;
       if (!book_id) {
+        // Fetch cover from Google Books API before inserting
+        let cover_url = null;
+        try {
+          const coverResponse = await fetch(`/api/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`);
+          if (coverResponse.ok) {
+            const coverData = await coverResponse.json();
+            cover_url = coverData.coverUrl || null;
+          }
+        } catch (coverError) {
+          console.error('Error fetching cover:', coverError);
+          // Continue without cover if fetch fails
+        }
+
         const { data: newBook, error: insertBookError } = await supabase
           .from('books')
-          .insert({ title: validatedData.title, author_id, created_by: user.id })
+          .insert({ 
+            title: validatedData.title, 
+            author_id, 
+            created_by: user.id,
+            cover_url 
+          })
           .select('id')
           .single();
         if (insertBookError) throw insertBookError;
@@ -112,8 +130,6 @@ export const AddBookButton = () => {
           notes: formData.notes || null,
         });
       if (insertUserBookError) throw insertUserBookError;
-
-      // Note: Cover fetching removed - UPDATE policy dropped for data integrity
 
       toast({
         title: "Book Added!",
