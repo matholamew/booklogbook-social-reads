@@ -29,6 +29,8 @@ export const useUserBooks = () => {
 
       if (error) throw error;
 
+      console.log('useUserBooks raw data:', data);
+      
       return data.map((userBook: any) => ({
         id: userBook.id,
         bookId: userBook.book_id,
@@ -44,7 +46,10 @@ export const useUserBooks = () => {
         cover_image_url: userBook.books?.cover_url || null, // For backward compatibility
         updatedAt: userBook.updated_at,
         createdAt: userBook.created_at,
-      }));
+      })).map(book => {
+        console.log('Mapped book:', book.title, 'coverUrl:', book.coverUrl);
+        return book;
+      });
     },
     enabled: !!user,
   });

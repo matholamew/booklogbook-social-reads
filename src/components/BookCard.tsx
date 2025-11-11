@@ -31,6 +31,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const BookCard = ({ book, onClick }: BookCardProps) => {
   const [coverUrl, setCoverUrl] = useState(book.coverUrl);
+  
+  console.log('BookCard rendering:', book.title, 'initial coverUrl:', book.coverUrl, 'state coverUrl:', coverUrl);
 
   useEffect(() => {
     const fetchCover = async () => {
