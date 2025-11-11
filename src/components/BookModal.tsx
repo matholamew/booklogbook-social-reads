@@ -32,7 +32,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
       console.log('BookModal - Fetching book with ID:', bookId);
       supabase
         .from('books')
-        .select('id, title, cover_image_url, authors (name)')
+        .select('id, title, cover_url, authors (name)')
         .eq('id', bookId)
         .single()
         .then(({ data, error }) => {
@@ -44,7 +44,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
           setLoading(false);
           
           // If no cover image, try to fetch it from Google Books API
-          if (data && !data.cover_image_url && data.title && data.authors && typeof data.authors === 'object' && 'name' in data.authors) {
+          if (data && !data.cover_url && data.title && data.authors && typeof data.authors === 'object' && 'name' in data.authors) {
             fetchBookCover(data.title, (data.authors as { name: string }).name, data.id);
           }
         });
@@ -59,14 +59,9 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
       if (response.ok) {
         const data = await response.json();
         if (data.coverUrl) {
-          // Update the book in the database
-          await supabase
-            .from('books')
-            .update({ cover_image_url: data.coverUrl })
-            .eq('id', bookId);
-          
-          // Update the local state
-          setBook(prev => prev ? { ...prev, cover_image_url: data.coverUrl } : null);
+          // Update local state only - database UPDATE policy removed for security
+          // Covers from GoogleBooksModal are persisted; dynamic fetches display immediately
+          setBook(prev => prev ? { ...prev, cover_url: data.coverUrl } : null);
         }
       }
     } catch (error) {
@@ -254,7 +249,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
           <>
             <div className="flex flex-row items-start gap-4 mb-4">
               <img
-                src={book.cover_image_url || '/placeholder.svg'}
+                src={book.cover_url || '/placeholder.svg'}
                 alt={book.title + ' cover'}
                 className="w-32 h-48 object-cover rounded shadow border border-slate-200 bg-white"
               />
