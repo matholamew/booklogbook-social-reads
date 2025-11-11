@@ -34,6 +34,14 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
   
   console.log('BookCard rendering:', book.title, 'initial coverUrl:', book.coverUrl, 'state coverUrl:', coverUrl);
 
+  // Update coverUrl when book.coverUrl changes
+  useEffect(() => {
+    if (book.coverUrl) {
+      console.log('BookCard updating coverUrl from props:', book.title, book.coverUrl);
+      setCoverUrl(book.coverUrl);
+    }
+  }, [book.coverUrl, book.title]);
+
   useEffect(() => {
     const fetchCover = async () => {
       if (!coverUrl && book.title && book.author) {
