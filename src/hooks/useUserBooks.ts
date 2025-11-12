@@ -29,26 +29,36 @@ export const useUserBooks = () => {
 
       if (error) throw error;
 
-      console.log('useUserBooks raw data:', data);
+      // Debug: Log the raw structure from Supabase
+      console.log('🔍 DEBUG useUserBooks - Total books fetched:', data?.length);
+      console.log('🔍 DEBUG useUserBooks - First book raw data:', data?.[0]);
+      console.log('🔍 DEBUG useUserBooks - First book.books object:', data?.[0]?.books);
+      console.log('🔍 DEBUG useUserBooks - First book cover_url:', data?.[0]?.books?.cover_url);
       
-      return data.map((userBook: any) => ({
-        id: userBook.id,
-        bookId: userBook.book_id,
-        title: userBook.books?.title || 'Unknown',
-        author: userBook.books?.authors?.name || 'Unknown Author',
-        status: userBook.status,
-        dateStarted: userBook.date_started,
-        dateFinished: userBook.date_finished,
-        rating: userBook.rating,
-        notes: userBook.notes,
-        isFavorite: userBook.is_favorite,
-        coverUrl: userBook.books?.cover_url || null,
-        cover_image_url: userBook.books?.cover_url || null, // For backward compatibility
-        updatedAt: userBook.updated_at,
-        createdAt: userBook.created_at,
-      })).map(book => {
-        console.log('Mapped book:', book.title, 'coverUrl:', book.coverUrl);
-        return book;
+      return data.map((userBook: any) => {
+        const mapped = {
+          id: userBook.id,
+          bookId: userBook.book_id,
+          title: userBook.books?.title || 'Unknown',
+          author: userBook.books?.authors?.name || 'Unknown Author',
+          status: userBook.status,
+          dateStarted: userBook.date_started,
+          dateFinished: userBook.date_finished,
+          rating: userBook.rating,
+          notes: userBook.notes,
+          isFavorite: userBook.is_favorite,
+          coverUrl: userBook.books?.cover_url || null,
+          cover_image_url: userBook.books?.cover_url || null,
+          updatedAt: userBook.updated_at,
+          createdAt: userBook.created_at,
+        };
+        
+        // Debug: Log each mapped book
+        if (mapped.title.includes('Thank You for Arguing')) {
+          console.log('🔍 DEBUG Mapping "Thank You for Arguing":', mapped);
+        }
+        
+        return mapped;
       });
     },
     enabled: !!user,
