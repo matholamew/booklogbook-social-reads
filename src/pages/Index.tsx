@@ -17,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 
+console.log('🚀 Index.tsx MODULE LOADED');
+
 // Mock data for unauthenticated users
 const mockBooks = [
   {

@@ -29,9 +29,15 @@ function parseLocalDate(dateString?: string) {
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+console.log('🚀 BookCard.tsx MODULE LOADED');
+
 export const BookCard = ({ book, onClick }: BookCardProps) => {
+  console.log('🚀 BookCard rendering:', book.title, 'coverUrl:', book.coverUrl);
+  
   // Directly use book.coverUrl without state - simpler and more reactive
   const displayCoverUrl = book.coverUrl || '/placeholder.svg';
+  
+  console.log('🚀 BookCard displayCoverUrl:', displayCoverUrl);
   
   // Debug: Log what we're receiving (will help identify the issue)
   if (book.title === 'Thank You for Arguing, Fourth Edition (Revised and Updated)') {

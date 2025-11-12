@@ -2,7 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
+console.log('🚀 useUserBooks.ts MODULE LOADED');
+
 export const useUserBooks = () => {
+  console.log('🚀 useUserBooks hook called');
   const { user } = useAuth();
 
   return useQuery({
