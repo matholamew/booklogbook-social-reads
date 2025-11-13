@@ -9,6 +9,8 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { useSupabaseRealtime } from '@/hooks/useSupabaseRealtime';
 
+console.log('🔥🔥🔥 APP.TSX LOADING - BUILD TIMESTAMP:', new Date().toISOString());
+
 const queryClient = new QueryClient();
 
 function SupabaseRealtimeWrapper() {
@@ -17,7 +19,7 @@ function SupabaseRealtimeWrapper() {
 }
 
 const App = () => {
-  console.log('App component rendered');
+  console.log('🔥🔥🔥 APP COMPONENT RENDERING - BUILD TIMESTAMP:', new Date().toISOString());
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
