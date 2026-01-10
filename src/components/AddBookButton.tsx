@@ -52,20 +52,35 @@ export const AddBookButton = () => {
 
     try {
       // 1. Check or insert author
-      let { data: authorData } = await supabase
+      console.log('🔥 AddBookButton: Looking up author:', formData.author);
+      let { data: authorData, error: authorLookupError } = await supabase
         .from('authors')
         .select('id')
         .eq('name', formData.author)
         .maybeSingle();
       
+      if (authorLookupError) {
+        console.error('🔥 AddBookButton: Author lookup error:', authorLookupError);
+      }
+      
       let author_id = authorData?.id;
+      console.log('🔥 AddBookButton: Existing author_id:', author_id);
+      
       if (!author_id) {
+        const insertPayload = { name: validatedData.author, created_by: user.id };
+        console.log('🔥 AddBookButton: Inserting new author with payload:', insertPayload);
+        
         const { data: newAuthor, error: insertAuthorError } = await supabase
           .from('authors')
-          .insert({ name: validatedData.author, created_by: user.id })
+          .insert(insertPayload)
           .select('id')
           .single();
-        if (insertAuthorError) throw insertAuthorError;
+        
+        if (insertAuthorError) {
+          console.error('🔥 AddBookButton: Author insert error:', insertAuthorError);
+          throw new Error(`Failed to add author: ${insertAuthorError.message} (Code: ${insertAuthorError.code})`);
+        }
+        console.log('🔥 AddBookButton: New author created:', newAuthor);
         author_id = newAuthor.id;
       }
 
