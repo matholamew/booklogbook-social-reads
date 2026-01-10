@@ -31,3 +31,6 @@ enable_confirmations = false
 
 [functions.get-book-cover]
 verify_jwt = false
+
+[functions.backfill-covers]
+verify_jwt = false
