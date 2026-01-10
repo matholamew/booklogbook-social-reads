@@ -94,16 +94,37 @@ export const AddBookButton = () => {
       
       let book_id = bookData?.id;
       if (!book_id) {
-        // Fetch cover from Google Books API before inserting
+        // Fetch cover from Google Books API via Supabase Edge Function (authenticated)
         let cover_url = null;
         try {
-          const coverResponse = await fetch(`/api/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`);
+          console.log('🔥 AddBookButton: Fetching cover from Supabase Edge Function');
+          const { data: coverData, error: coverError } = await supabase.functions.invoke('get-book-cover', {
+            body: null,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          // Use query params approach - invoke with GET-like behavior
+          const coverResponse = await fetch(
+            `https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          
           if (coverResponse.ok) {
-            const coverData = await coverResponse.json();
-            cover_url = coverData.coverUrl || null;
+            const data = await coverResponse.json();
+            cover_url = data.coverUrl || null;
+            console.log('🔥 AddBookButton: Got cover URL:', cover_url);
+          } else {
+            console.warn('🔥 AddBookButton: Cover fetch failed:', coverResponse.status);
           }
         } catch (coverError) {
-          console.error('Error fetching cover:', coverError);
+          console.error('🔥 AddBookButton: Error fetching cover:', coverError);
           // Continue without cover if fetch fails
         }
 
