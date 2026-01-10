@@ -1,7 +1,6 @@
 import { Calendar, User as UserIcon, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-
 interface Book {
   id: string; // Make id required
   title: string;
@@ -26,24 +25,13 @@ function parseLocalDate(dateString?: string) {
   return new Date(year, month - 1, day);
 }
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-
-console.log('🚀 BookCard.tsx MODULE LOADED');
+console.log('🔥🔥🔥 BookCard.tsx MODULE LOADED - BUILD:', new Date().toISOString());
 
 export const BookCard = ({ book, onClick }: BookCardProps) => {
-  console.log('🚀 BookCard rendering:', book.title, 'coverUrl:', book.coverUrl);
-  
-  // Directly use book.coverUrl without state - simpler and more reactive
+  // Use correct placeholder path (not /public/placeholder.svg)
   const displayCoverUrl = book.coverUrl || '/placeholder.svg';
   
-  console.log('🚀 BookCard displayCoverUrl:', displayCoverUrl);
-  
-  // Debug: Log what we're receiving (will help identify the issue)
-  if (book.title === 'Thank You for Arguing, Fourth Edition (Revised and Updated)') {
-    console.log('🔍 DEBUG Thank You for Arguing - coverUrl:', book.coverUrl);
-    console.log('🔍 DEBUG Thank You for Arguing - full book object:', book);
-  }
+  console.log('🔥 BookCard:', book.title, '| coverUrl:', book.coverUrl, '| display:', displayCoverUrl);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'reading': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-400';
