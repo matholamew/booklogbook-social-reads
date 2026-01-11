@@ -70,27 +70,18 @@ export const Header = () => {
         .select('id, username, display_name, avatar_url')
         .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
         .limit(5);
-      // Google Books API
       let googleBooks: any[] = [];
       try {
-        const res = await fetch(`/api/google-books-proxy?q=${encodeURIComponent(searchQuery)}`);
-        const googleData = await res.json();
-        googleBooks = (googleData.items || []).map((item: any) => {
-          const info = item.volumeInfo;
-          return {
-            id: item.id,
-            title: info.title,
-            authors: info.authors || [],
-            coverUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
-            description: info.description || '',
-            pageCount: info.pageCount,
-            publishedDate: info.publishedDate,
-            isbn: (info.industryIdentifiers || []).find((id: any) => id.type === 'ISBN_13')?.identifier || '',
-            googleBooksUrl: info.infoLink,
+        const res = await fetch(`https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/search-google-books?q=${encodeURIComponent(searchQuery)}&maxResults=5`);
+        if (res.ok) {
+          const googleData = await res.json();
+          googleBooks = (googleData.items || []).map((item: any) => ({
+            ...item,
             _type: 'googleBook',
-          };
-        });
+          }));
+        }
       } catch (err) {
+        console.error('Google Books search error:', err);
         googleBooks = [];
       }
       setSearchResults({

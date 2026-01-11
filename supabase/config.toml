@@ -34,3 +34,6 @@ verify_jwt = false
 
 [functions.backfill-covers]
 verify_jwt = false
+
+[functions.search-google-books]
+verify_jwt = false
