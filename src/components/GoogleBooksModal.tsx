@@ -82,7 +82,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
         setFavorite(true);
       }
       toast({ title: favorite ? 'Book Unfavorited' : 'Book Favorited', description: favorite ? 'Book removed from your favorites.' : 'Book added to your favorites.' });
-      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['userBooks', user.id] });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to update favorite status.' });
     }
@@ -157,7 +157,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
       if (userBookFetchError) throw userBookFetchError;
       if (userBook && userBook.id) {
         toast({ title: 'Already in Library', description: 'This book is already in your reading list.' });
-        queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['userBooks', user.id] });
         onClose();
         return;
       }
@@ -172,7 +172,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
       if (insertError) throw insertError;
       
       toast({ title: 'Book Added', description: 'Book added to your "To Be Read" list.' });
-      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['userBooks', user.id] });
       onClose();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to add book to library.' });

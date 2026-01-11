@@ -180,7 +180,7 @@ export const AddBookButton = () => {
         notes: ''
       });
       setOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['userBooks', user.id] });
     } catch (err: any) {
       setError(err.message || 'An error occurred while adding the book.');
     }
