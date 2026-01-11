@@ -55,7 +55,12 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
   // Function to fetch book cover from Google Books API
   const fetchBookCover = async (title: string, author: string, bookId: string) => {
     try {
-      const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`);
+      const session = await supabase.auth.getSession();
+      const response = await fetch(`https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}`, {
+        headers: {
+          'Authorization': `Bearer ${session.data.session?.access_token}`,
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.coverUrl) {
@@ -198,7 +203,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
       if (userBookFetchError) throw userBookFetchError;
       if (userBook && userBook.id) {
         toast({ title: 'Already in Library', description: 'This book is already in your reading list.' });
-        queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+        queryClient.invalidateQueries({ queryKey: ['userBooks', user.id] });
         onClose();
         return;
       }
@@ -212,7 +217,7 @@ export const BookModal = ({ open, bookId, onClose, onAddToLibrary }: BookModalPr
         });
       if (insertError) throw insertError;
       toast({ title: 'Book Added', description: 'Book added to your "To Be Read" list.' });
-      queryClient.invalidateQueries({ queryKey: ['user-books', user.id] });
+      queryClient.invalidateQueries({ queryKey: ['userBooks', user.id] });
       onClose();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to add book to library.' });

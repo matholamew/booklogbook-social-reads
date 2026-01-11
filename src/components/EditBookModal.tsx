@@ -45,7 +45,11 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     const fetchCover = async () => {
       if (!coverUrl && book?.title && book?.author) {
         try {
-          const response = await fetch(`/api/get-book-cover?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author)}`);
+          const response = await fetch(`https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(book.title)}&author=${encodeURIComponent(book.author)}`, {
+            headers: {
+              'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            },
+          });
           if (response.ok) {
             const data = await response.json();
             if (data.coverUrl) {
@@ -187,7 +191,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
         title: 'Book updated!',
         description: `${book?.title} has been updated.`
       });
-      queryClient.invalidateQueries({ queryKey: ['user-books', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ['userBooks', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['activity-feed', user?.id] });
       onOpenChange(false);
       queryClient.invalidateQueries(); // fallback: invalidate all queries for extra reliability
