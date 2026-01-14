@@ -37,3 +37,6 @@ verify_jwt = false
 
 [functions.search-google-books]
 verify_jwt = false
+
+[functions.get-book-recommendations]
+verify_jwt = false
