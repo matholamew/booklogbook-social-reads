@@ -10,11 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { Book, Users, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Book, Users, TrendingUp, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { EditBookModal } from '@/components/EditBookModal';
 import { BookRecommendations } from '@/components/BookRecommendations';
+import { StarRating } from '@/components/StarRating';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -64,6 +66,7 @@ const Index = () => {
   const [userDisplayName, setUserDisplayName] = useState('');
   const [currentSection, setCurrentSection] = useState<SectionType>('reading');
   const [sectionPage, setSectionPage] = useState(1);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
   const booksPerPage = 10;
   const booksPerSection = 6;
 
@@ -76,12 +79,18 @@ const Index = () => {
     }
   }, [userBooks, booksLoading]);
 
+  // Apply rating filter
+  const applyRatingFilter = (books: typeof userBooks) => {
+    if (ratingFilter === null) return books;
+    return books.filter(book => book.rating === ratingFilter);
+  };
+
   // Get books for each section
-  const readingBooks = userBooks.filter(book => book.status === 'reading')
+  const readingBooks = applyRatingFilter(userBooks.filter(book => book.status === 'reading'))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  const plannedBooks = userBooks.filter(book => book.status === 'planned')
+  const plannedBooks = applyRatingFilter(userBooks.filter(book => book.status === 'planned'))
     .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-  const finishedBooks = userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish')
+  const finishedBooks = applyRatingFilter(userBooks.filter(book => book.status === 'finished' || book.status === 'did_not_finish'))
     .sort((a, b) => {
       // Sort by dateStarted descending (most recent first)
       if (!a.dateStarted && !b.dateStarted) return 0;
@@ -199,6 +208,52 @@ const Index = () => {
                 booksThisYear={stats?.booksThisYear}
                 following={stats?.following}
               />
+            </div>
+
+            {/* Rating Filter */}
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-sm font-medium text-foreground">Filter by rating:</span>
+              <Select 
+                value={ratingFilter?.toString() || 'all'} 
+                onValueChange={(value) => setRatingFilter(value === 'all' ? null : parseInt(value))}
+              >
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="All ratings" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All ratings</SelectItem>
+                  <SelectItem value="5">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 5 stars
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="4">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 4 stars
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="3">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 3 stars
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="2">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 2 stars
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="1">
+                    <div className="flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" /> 1 star
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {ratingFilter !== null && (
+                <Button variant="ghost" size="sm" onClick={() => setRatingFilter(null)}>
+                  Clear
+                </Button>
+              )}
             </div>
 
             {/* Main Content Grid */}
