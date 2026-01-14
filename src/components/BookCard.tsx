@@ -2,6 +2,7 @@ import { Calendar, User as UserIcon, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { StarRating } from './StarRating';
 
 interface Book {
   id: string;
@@ -16,6 +17,7 @@ interface Book {
   currentPage?: number;
   pageCount?: number;
   progressPercent?: number;
+  rating?: number | null;
 }
 
 interface BookCardProps {
@@ -73,7 +75,7 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
           className="w-16 h-24 object-cover rounded shadow border border-slate-200 bg-white flex-shrink-0"
         />
         <div className="flex-1 min-w-0 flex flex-col justify-center">
-          <div className="flex justify-between items-start mb-3">
+          <div className="flex justify-between items-start mb-2">
             <Badge className={`${getStatusColor(book.status)} transition-all duration-200 font-medium text-xs`}>
               {getStatusText(book.status)}
             </Badge>
@@ -81,6 +83,12 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
               <Star className="h-5 w-5 text-yellow-400 fill-yellow-400 ml-2" />
             )}
           </div>
+          
+          {book.rating && book.rating > 0 && (
+            <div className="mb-2">
+              <StarRating rating={book.rating} readonly size="sm" />
+            </div>
+          )}
           
           <h3 className="font-semibold text-lg text-slate-900 mb-1 line-clamp-2 font-serif">
             {book.title}

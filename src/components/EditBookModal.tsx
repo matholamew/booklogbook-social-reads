@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Star, StarOff } from 'lucide-react';
 import { toggleFavoriteBook } from '@/lib/favorite';
 import { bookUpdateSchema } from '@/lib/validation';
+import { StarRating } from './StarRating';
+import { BookNotesSection } from './BookNotesSection';
 
 interface EditBookModalProps {
   open: boolean;
@@ -29,6 +31,7 @@ interface EditBookModalProps {
     cover_image_url?: string;
     currentPage?: number;
     pageCount?: number;
+    rating?: number | null;
   };
 }
 
@@ -77,6 +80,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     dateFinished: book.dateFinished || '',
     notes: book.notes || '',
     currentPage: book.currentPage || 0,
+    rating: book.rating || null as number | null,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -188,6 +192,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
           date_finished: validatedData.dateFinished || null,
           notes: validatedData.notes || null,
           current_page: formData.currentPage || 0,
+          rating: formData.rating || null,
         })
         .eq('id', book?.id);
       if (updateError) throw updateError;
@@ -347,16 +352,34 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
                 )}
               </div>
             )}
+            {/* Star Rating */}
             <div>
-              <Label htmlFor="notes" className="text-slate-800 font-medium">Notes</Label>
+              <Label className="text-slate-800 font-medium">Your Rating</Label>
+              <div className="mt-2">
+                <StarRating
+                  rating={formData.rating}
+                  onChange={(rating) => setFormData({ ...formData, rating: rating === 0 ? null : rating })}
+                  size="lg"
+                />
+                {formData.rating && formData.rating > 0 && (
+                  <p className="text-sm text-slate-500 mt-1">{formData.rating} of 5 stars</p>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="notes" className="text-slate-800 font-medium">Quick Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 placeholder="Your thoughts, quotes, or reflections..."
-                className="mt-1 min-h-[100px] border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
+                className="mt-1 min-h-[80px] border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
               />
             </div>
+
+            {/* Book Notes Section */}
+            <BookNotesSection userBookId={book.id} bookTitle={book.title} />
           </div>
           {error && (
             <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md border border-red-200" aria-live="polite">

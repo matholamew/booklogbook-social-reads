@@ -80,6 +80,57 @@ export type Database = {
         }
         Relationships: []
       }
+      book_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          highlight_text: string | null
+          id: string
+          page_number: number | null
+          tags: string[] | null
+          updated_at: string | null
+          user_book_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          highlight_text?: string | null
+          id?: string
+          page_number?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_book_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          highlight_text?: string | null
+          id?: string
+          page_number?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          user_book_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_notes_user_book_id_fkey"
+            columns: ["user_book_id"]
+            isOneToOne: false
+            referencedRelation: "user_books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_notes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           author_id: string | null
@@ -173,6 +224,7 @@ export type Database = {
           favorite: boolean
           id: string
           notes: string | null
+          rating: number | null
           status: Database["public"]["Enums"]["reading_status"] | null
           updated_at: string | null
           user_id: string
@@ -186,6 +238,7 @@ export type Database = {
           favorite?: boolean
           id?: string
           notes?: string | null
+          rating?: number | null
           status?: Database["public"]["Enums"]["reading_status"] | null
           updated_at?: string | null
           user_id: string
@@ -199,6 +252,7 @@ export type Database = {
           favorite?: boolean
           id?: string
           notes?: string | null
+          rating?: number | null
           status?: Database["public"]["Enums"]["reading_status"] | null
           updated_at?: string | null
           user_id?: string
