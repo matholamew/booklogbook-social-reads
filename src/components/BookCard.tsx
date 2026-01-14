@@ -1,8 +1,10 @@
 import { Calendar, User as UserIcon, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+
 interface Book {
-  id: string; // Make id required
+  id: string;
   title: string;
   author: string;
   dateStarted?: string;
@@ -11,6 +13,9 @@ interface Book {
   status: 'reading' | 'finished' | 'planned' | 'did_not_finish';
   favorite?: boolean;
   coverUrl?: string;
+  currentPage?: number;
+  pageCount?: number;
+  progressPercent?: number;
 }
 
 interface BookCardProps {
@@ -98,6 +103,21 @@ export const BookCard = ({ book, onClick }: BookCardProps) => {
                 <div className="flex items-center">
                   <Calendar className="h-3 w-3 mr-1" />
                   Finished: {parseLocalDate(book.dateFinished)?.toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          )}
+
+          {book.status === 'reading' && book.pageCount && book.pageCount > 0 && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 mb-1">
+                <span>Progress</span>
+                <span className="font-medium">{book.progressPercent || 0}%</span>
+              </div>
+              <Progress value={book.progressPercent || 0} className="h-1.5" />
+              {book.currentPage !== undefined && (
+                <div className="text-xs text-slate-500 mt-0.5">
+                  Page {book.currentPage} of {book.pageCount}
                 </div>
               )}
             </div>

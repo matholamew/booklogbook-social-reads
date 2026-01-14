@@ -20,6 +20,7 @@ export const useUserBooks = () => {
             id,
             title,
             cover_url,
+            page_count,
             authors (
               id,
               name
@@ -38,9 +39,14 @@ export const useUserBooks = () => {
       console.log('🔍 DEBUG useUserBooks - First book cover_url:', data?.[0]?.books?.cover_url);
       
       return data.map((userBook: any) => {
+        const pageCount = userBook.books?.page_count || 0;
+        const currentPage = userBook.current_page || 0;
+        const progressPercent = pageCount > 0 ? Math.round((currentPage / pageCount) * 100) : 0;
+        
         const mapped = {
           id: userBook.id,
           bookId: userBook.book_id,
+          book_id: userBook.book_id,
           title: userBook.books?.title || 'Unknown',
           author: userBook.books?.authors?.name || 'Unknown Author',
           status: userBook.status,
@@ -53,6 +59,9 @@ export const useUserBooks = () => {
           cover_image_url: userBook.books?.cover_url || null,
           updatedAt: userBook.updated_at,
           createdAt: userBook.created_at,
+          currentPage: currentPage,
+          pageCount: pageCount,
+          progressPercent: progressPercent,
         };
         
         // Debug: Log each mapped book

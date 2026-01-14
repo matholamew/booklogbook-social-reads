@@ -27,6 +27,8 @@ interface EditBookModalProps {
     notes?: string;
     coverUrl?: string;
     cover_image_url?: string;
+    currentPage?: number;
+    pageCount?: number;
   };
 }
 
@@ -74,6 +76,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
     dateStarted: book.dateStarted || '',
     dateFinished: book.dateFinished || '',
     notes: book.notes || '',
+    currentPage: book.currentPage || 0,
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -184,6 +187,7 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
           date_started: validatedData.dateStarted || null,
           date_finished: validatedData.dateFinished || null,
           notes: validatedData.notes || null,
+          current_page: formData.currentPage || 0,
         })
         .eq('id', book?.id);
       if (updateError) throw updateError;
@@ -312,6 +316,37 @@ export const EditBookModal = ({ open, onOpenChange, book }: EditBookModalProps) 
                 />
               </div>
             </div>
+            {/* Reading Progress */}
+            {(formData.status === 'reading') && (
+              <div className="space-y-2">
+                <Label className="text-slate-800 font-medium">Reading Progress</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="number"
+                    min={0}
+                    max={book.pageCount || 9999}
+                    value={formData.currentPage}
+                    onChange={(e) => setFormData({ ...formData, currentPage: parseInt(e.target.value) || 0 })}
+                    className="w-24 border-2 border-slate-300 focus:border-slate-700 text-slate-900 bg-white"
+                    placeholder="Page"
+                  />
+                  <span className="text-slate-600">of {book.pageCount || '?'} pages</span>
+                  {book.pageCount && book.pageCount > 0 && (
+                    <span className="text-sm font-medium text-primary">
+                      ({Math.round((formData.currentPage / book.pageCount) * 100)}%)
+                    </span>
+                  )}
+                </div>
+                {book.pageCount && book.pageCount > 0 && (
+                  <div className="w-full bg-slate-200 rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(100, Math.round((formData.currentPage / book.pageCount) * 100))}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
             <div>
               <Label htmlFor="notes" className="text-slate-800 font-medium">Notes</Label>
               <Textarea

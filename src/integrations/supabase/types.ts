@@ -167,6 +167,7 @@ export type Database = {
         Row: {
           book_id: string
           created_at: string | null
+          current_page: number | null
           date_finished: string | null
           date_started: string | null
           favorite: boolean
@@ -179,6 +180,7 @@ export type Database = {
         Insert: {
           book_id: string
           created_at?: string | null
+          current_page?: number | null
           date_finished?: string | null
           date_started?: string | null
           favorite?: boolean
@@ -191,6 +193,7 @@ export type Database = {
         Update: {
           book_id?: string
           created_at?: string | null
+          current_page?: number | null
           date_finished?: string | null
           date_started?: string | null
           favorite?: boolean
