@@ -98,14 +98,6 @@ export const AddBookButton = () => {
         let cover_url = null;
         try {
           console.log('🔥 AddBookButton: Fetching cover from Supabase Edge Function');
-          const { data: coverData, error: coverError } = await supabase.functions.invoke('get-book-cover', {
-            body: null,
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          
-          // Use query params approach - invoke with GET-like behavior
           const coverResponse = await fetch(
             `https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`,
             {
