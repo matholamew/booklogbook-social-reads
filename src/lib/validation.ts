@@ -10,7 +10,7 @@ export const bookInputSchema = z.object({
     .trim()
     .min(1, "Author is required")
     .max(200, "Author must be less than 200 characters"),
-  status: z.enum(['planned', 'reading', 'finished']).optional(),
+  status: z.enum(['planned', 'reading', 'finished', 'did_not_finish']).optional(),
   dateStarted: z.string().optional(),
   dateFinished: z.string().optional(),
   notes: z.string()
@@ -20,7 +20,7 @@ export const bookInputSchema = z.object({
 });
 
 export const bookUpdateSchema = z.object({
-  status: z.enum(['planned', 'reading', 'finished']),
+  status: z.enum(['planned', 'reading', 'finished', 'did_not_finish']),
   dateStarted: z.string().optional(),
   dateFinished: z.string().optional(),
   notes: z.string()

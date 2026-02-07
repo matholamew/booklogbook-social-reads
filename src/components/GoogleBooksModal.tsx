@@ -26,14 +26,29 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
     const fetchFavoriteStatus = async () => {
       if (open && user && book?.isbn) {
         setFavoriteLoading(true);
+        // First find the book by ISBN
+        const { data: bookData, error: bookError } = await supabase
+          .from('books')
+          .select('id')
+          .eq('isbn', book.isbn)
+          .maybeSingle();
+        
+        if (bookError || !bookData?.id) {
+          setFavorite(false);
+          setFavoriteLoading(false);
+          return;
+        }
+        
+        // Then check if user has this book favorited
         const { data, error } = await supabase
           .from('user_books')
-          .select('id, favorite, book_id')
+          .select('id, favorite')
           .eq('user_id', user.id)
+          .eq('book_id', bookData.id)
           .maybeSingle();
-        if (!error && data && data.favorite && data.book_id) {
-          // Optionally, you could check if the book_id matches a book with this ISBN
-          setFavorite(!!data.favorite);
+        
+        if (!error && data?.favorite) {
+          setFavorite(true);
         } else {
           setFavorite(false);
         }
@@ -43,7 +58,7 @@ export const GoogleBooksModal = ({ open, book, onClose }: GoogleBooksModalProps)
       }
     };
     fetchFavoriteStatus();
-  }, [open, user, book]);
+  }, [open, user?.id, book?.isbn]);
 
   // Toggle favorite handler (by ISBN)
   const handleToggleFavorite = async () => {

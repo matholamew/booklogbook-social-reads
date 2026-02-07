@@ -75,7 +75,8 @@ export const BookNotesSection = ({ userBookId, bookTitle }: BookNotesSectionProp
 
   useEffect(() => {
     fetchNotes();
-  }, [userBookId, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userBookId, user?.id]);
 
   // Get all unique tags
   const allTags = Array.from(new Set(notes.flatMap(n => n.tags || [])));
