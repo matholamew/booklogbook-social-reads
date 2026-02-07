@@ -1,5 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useUserBooks } from '@/hooks/useUserBooks';
+import { usePublicBooks } from '@/hooks/usePublicBooks';
 import { useUserStats } from '@/hooks/useUserStats';
 import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
@@ -22,42 +23,12 @@ import { supabase } from '@/integrations/supabase/client';
 
 console.log('🚀 Index.tsx MODULE LOADED');
 
-// Mock data for unauthenticated users
-const mockBooks = [
-  {
-    id: '1',
-    title: 'The Thursday Murder Club',
-    author: 'Richard Osman',
-    dateStarted: '2024-01-15',
-    dateFinished: undefined,
-    status: 'reading' as const,
-    notes: 'Such a delightful mystery! The characters are wonderfully developed.'
-  },
-  {
-    id: '2',
-    title: 'Educated',
-    author: 'Tara Westover',
-    dateStarted: '2024-01-01',
-    dateFinished: '2024-01-10',
-    status: 'finished' as const,
-    notes: 'Incredibly powerful memoir about education and family.'
-  },
-  {
-    id: '3',
-    title: 'The Midnight Library',
-    author: 'Matt Haig',
-    dateStarted: undefined,
-    dateFinished: undefined,
-    status: 'planned' as const,
-    notes: ''
-  }
-];
-
 type SectionType = 'reading' | 'planned' | 'finished';
 
 const Index = () => {
   const { user, loading } = useAuth();
   const { data: userBooks = [], isLoading: booksLoading } = useUserBooks();
+  const { data: publicBooks = [], isLoading: publicBooksLoading } = usePublicBooks();
   const { data: stats, isLoading: statsLoading } = useUserStats();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -479,14 +450,30 @@ const Index = () => {
               </Card>
             </div>
 
-            {/* Sample books preview */}
+            {/* Recently Added Books */}
             <div className="mb-12">
-              <h2 className="text-2xl font-bold font-serif mb-6">Sample Reading Journey</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {mockBooks.map(book => (
-                  <BookCard key={book.id} book={book} />
-                ))}
-              </div>
+              <h2 className="text-2xl font-bold font-serif mb-6">Recently Added Books</h2>
+              {publicBooksLoading ? (
+                <div className="text-muted-foreground">Loading books...</div>
+              ) : publicBooks.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {publicBooks.slice(0, 8).map(book => (
+                    <div key={book.id} className="group">
+                      <div className="aspect-[2/3] relative overflow-hidden rounded-lg shadow-md border border-border bg-card transition-transform group-hover:scale-105">
+                        <img
+                          src={book.coverUrl || '/placeholder.svg'}
+                          alt={`${book.title} cover`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <h3 className="mt-2 text-sm font-medium text-foreground line-clamp-2">{book.title}</h3>
+                      <p className="text-xs text-muted-foreground">{book.author}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No books available yet.</p>
+              )}
             </div>
 
             {/* Call to action */}
