@@ -71,18 +71,29 @@ export const Header = () => {
         .or(`username.ilike.%${searchQuery}%,display_name.ilike.%${searchQuery}%`)
         .limit(5);
       let googleBooks: any[] = [];
-      try {
-        const res = await fetch(`https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/search-google-books?q=${encodeURIComponent(searchQuery)}&maxResults=5`);
-        if (res.ok) {
-          const googleData = await res.json();
-          googleBooks = (googleData.items || []).map((item: any) => ({
-            ...item,
-            _type: 'googleBook',
-          }));
+      // Only search Google Books if user is authenticated (to prevent unauthorized API usage)
+      if (user) {
+        try {
+          const session = await supabase.auth.getSession();
+          const res = await fetch(
+            `https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/search-google-books?q=${encodeURIComponent(searchQuery)}&maxResults=5`,
+            {
+              headers: {
+                'Authorization': `Bearer ${session.data.session?.access_token}`,
+              },
+            }
+          );
+          if (res.ok) {
+            const googleData = await res.json();
+            googleBooks = (googleData.items || []).map((item: any) => ({
+              ...item,
+              _type: 'googleBook',
+            }));
+          }
+        } catch (err) {
+          console.error('Google Books search error:', err);
+          googleBooks = [];
         }
-      } catch (err) {
-        console.error('Google Books search error:', err);
-        googleBooks = [];
       }
       setSearchResults({
         books: books || [],
