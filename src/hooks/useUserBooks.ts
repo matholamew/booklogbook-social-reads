@@ -43,6 +43,10 @@ export const useUserBooks = () => {
         const currentPage = userBook.current_page || 0;
         const progressPercent = pageCount > 0 ? Math.round((currentPage / pageCount) * 100) : 0;
         
+        // Ensure cover URLs use HTTPS to avoid mixed content issues
+        const rawCoverUrl = userBook.books?.cover_url || null;
+        const safeCoverUrl = rawCoverUrl?.replace('http://', 'https://') || null;
+        
         const mapped = {
           id: userBook.id,
           bookId: userBook.book_id,
@@ -56,8 +60,8 @@ export const useUserBooks = () => {
           notes: userBook.notes,
           favorite: userBook.favorite,
           isFavorite: userBook.is_favorite,
-          coverUrl: userBook.books?.cover_url || null,
-          cover_image_url: userBook.books?.cover_url || null,
+          coverUrl: safeCoverUrl,
+          cover_image_url: safeCoverUrl,
           updatedAt: userBook.updated_at,
           createdAt: userBook.created_at,
           currentPage: currentPage,

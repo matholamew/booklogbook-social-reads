@@ -110,7 +110,8 @@ export const AddBookButton = () => {
           
           if (coverResponse.ok) {
             const data = await coverResponse.json();
-            cover_url = data.coverUrl || null;
+            // Ensure HTTPS to avoid mixed content issues
+            cover_url = data.coverUrl?.replace('http://', 'https://') || null;
             console.log('🔥 AddBookButton: Got cover URL:', cover_url);
           } else {
             console.warn('🔥 AddBookButton: Cover fetch failed:', coverResponse.status);

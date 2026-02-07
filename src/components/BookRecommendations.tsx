@@ -95,9 +95,35 @@ export const BookRecommendations = () => {
 
       let bookId = bookData?.id;
       if (!bookId) {
+        // Fetch cover from Google Books API via Edge Function
+        let cover_url: string | null = null;
+        try {
+          const session = await supabase.auth.getSession();
+          const coverResponse = await fetch(
+            `https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(rec.title)}&author=${encodeURIComponent(rec.author)}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${session.data.session?.access_token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          if (coverResponse.ok) {
+            const data = await coverResponse.json();
+            cover_url = data.coverUrl?.replace('http://', 'https://') || null;
+          }
+        } catch (coverError) {
+          console.error('Error fetching cover for recommendation:', coverError);
+        }
+
         const { data: newBook, error: bookError } = await supabase
           .from('books')
-          .insert({ title: rec.title, author_id: authorId, created_by: user.id })
+          .insert({ 
+            title: rec.title, 
+            author_id: authorId, 
+            created_by: user.id,
+            cover_url 
+          })
           .select('id')
           .single();
         if (bookError) throw bookError;
