@@ -78,14 +78,19 @@ Deno.serve(async (req) => {
 
     const data = await response.json()
     
-    // Get highest quality cover image
+    // Get highest quality cover image and ensure HTTPS
     const imageLinks = data.items?.[0]?.volumeInfo?.imageLinks
-    const coverUrl = (
+    const rawCoverUrl = (
+      imageLinks?.extraLarge ||
       imageLinks?.large ||
       imageLinks?.medium ||
       imageLinks?.small ||
       imageLinks?.thumbnail
-    )?.replace('http://', 'https://')
+    )
+    // Force HTTPS and remove zoom parameter for better quality
+    const coverUrl = rawCoverUrl
+      ?.replace('http://', 'https://')
+      ?.replace('&zoom=1', '&zoom=2')
 
     if (coverUrl) {
       console.log('Found cover URL:', coverUrl)
