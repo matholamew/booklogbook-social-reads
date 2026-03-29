@@ -1,57 +1,49 @@
 
 
-## Deep Analysis: Why Book Covers Are Not Showing
+## Deep Analysis: Why Stats Are Wrong
 
-### Root Causes Found
+### Root Cause
 
-**There are two distinct problems:**
+The problem is in `StatsOverview.tsx` line 12-15:
 
-#### Problem 1: Books added via "Add Book" button have NULL cover_url (primary issue)
+```tsx
+export const StatsOverview = ({ 
+  totalBooks = 47, 
+  booksThisYear = 12, 
+  following = 8 
+}: StatsOverviewProps) => {
+```
 
-The `AddBookButton` component calls the `get-book-cover` edge function to fetch a cover URL before inserting the book. However, the database shows that **8 of the most recent books have `cover_url = NULL`**, while older books have valid URLs.
+These are **hardcoded default values** (47, 12, 8) that display whenever the real stats are `undefined` -- which happens while the query is loading, or if it errors, or if the data hasn't arrived yet. Since `stats?.totalBooks` evaluates to `undefined` when `stats` is `undefined` (during loading), the destructuring defaults kick in and show 47/12/8.
 
-The edge function logs show **no recent activity**, meaning the function either:
-- Is not being called (possibly due to auth/CORS issues)
-- Is returning errors that are silently caught
+Your actual database data for your account (73e08b29) shows: **7 total books, 0 finished this year, 0 following**. The query logic in `useUserStats.ts` is actually correct -- the numbers just never reach the UI because the defaults mask them.
 
-Looking at `AddBookButton.tsx` line 101-118, the cover fetch is wrapped in a try/catch that silently continues on failure (`console.warn` only). If the edge function returns a non-OK response, the book is inserted without a cover.
+### Database Verification
 
-#### Problem 2: Books added via Google Books search DO save covers correctly
+| Status   | Rows | Unique Books |
+|----------|------|-------------|
+| planned  | 4    | 4           |
+| reading  | 2    | 2           |
+| finished | 1    | 1           |
+| **Total**| **7**| **7**       |
 
-The `GoogleBooksModal` correctly passes `book.coverUrl` from the search results (line 149). The `search-google-books` edge function returns `coverUrl` in its response (line 93). Books added this way have covers in the database. **This path works.**
+Books finished this year: **0** (the one finished book has no date in 2026).
 
-#### Problem 3: No backfill mechanism for existing NULL covers
+### Fix Plan
 
-There are 8 books already in the database with `cover_url = NULL`. Even if we fix the insert flow, these books will remain without covers unless we backfill them.
+**File 1: `src/components/StatsOverview.tsx`**
+- Remove hardcoded default values (47, 12, 8) from props
+- Add a new `isLoading` prop
+- When `isLoading` is true, render skeleton placeholders instead of numbers
+- When loaded, display the actual values (which will be 0 if no data)
 
-### The Fix Plan
-
-#### Step 1: Fix the `get-book-cover` edge function call in AddBookButton
-- Add better error logging to understand why the cover fetch is failing
-- Ensure the edge function URL construction and auth headers are correct
-- The function itself looks correct, so the issue is likely in the calling code or deployment
-
-#### Step 2: Create a backfill mechanism for existing books with NULL covers
-- Write a one-time script (or enhance the existing `backfill-covers` edge function) that:
-  1. Queries all books where `cover_url IS NULL`
-  2. For each, calls Google Books API to find a cover
-  3. Updates the `books` table with the found cover URL
-- Deploy and invoke this function to fix existing data
-
-#### Step 3: Add a fallback cover fetch on the client side
-- In `useUserBooks`, when a book has no `coverUrl`, attempt to fetch one from Google Books API via the edge function
-- Cache the result to avoid repeated calls
-- This serves as a safety net for any future books that slip through without covers
+**File 2: `src/pages/Index.tsx`**
+- Pass `statsLoading` (already destructured on line 31) to `StatsOverview` as `isLoading`
+- Change props to use `stats?.totalBooks ?? 0` instead of bare `stats?.totalBooks` so `undefined` never reaches the component
 
 ### Technical Details
 
-**Files to modify:**
-1. `src/components/AddBookButton.tsx` - Improve error handling and logging for cover fetch
-2. `supabase/functions/backfill-covers/index.ts` - Update to use service role key to update books with NULL covers
-3. `src/hooks/useUserBooks.ts` - Remove excessive debug logging, add cover fallback logic
-4. Deploy `backfill-covers` edge function and invoke it to fix existing data
-
-**Database changes:** None needed - the `books.cover_url` column and RLS policies (admins/moderators/owners can update) already support this.
-
-**Key insight:** The `books` table UPDATE policy only allows the book creator, admins, or moderators to update. The backfill function must use the service role key to bypass RLS and update all books.
+- `StatsOverview` will accept `isLoading?: boolean` and use the existing `Skeleton` component from `@/components/ui/skeleton` for the number placeholders
+- Default prop values will be changed from 47/12/8 to 0/0/0
+- No database changes needed -- the query logic is already correct
 
