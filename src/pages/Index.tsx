@@ -167,9 +167,10 @@ const Index = () => {
           <>
             <div className="mb-8">
               <StatsOverview 
-                totalBooks={stats?.totalBooks}
-                booksThisYear={stats?.booksThisYear}
-                following={stats?.following}
+                totalBooks={stats?.totalBooks ?? 0}
+                booksThisYear={stats?.booksThisYear ?? 0}
+                following={stats?.following ?? 0}
+                isLoading={statsLoading}
               />
             </div>
 
