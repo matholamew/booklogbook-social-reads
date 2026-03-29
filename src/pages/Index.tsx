@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Book, Users, TrendingUp, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import { EditBookModal } from '@/components/EditBookModal';
-import { BookRecommendations } from '@/components/BookRecommendations';
 import { StarRating } from '@/components/StarRating';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -333,9 +332,8 @@ const Index = () => {
                 </Card>
               </div>
 
-              {/* Right Column - Activity Feed & Recommendations */}
+              {/* Right Column - Activity Feed */}
               <div className="space-y-6">
-                <BookRecommendations />
                 <ActivityFeed />
                 
                 {/* Quick Actions */}
