@@ -72,8 +72,8 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       console.error('Google Books API error:', response.status, await response.text())
       return new Response(
-        JSON.stringify({ error: 'Failed to fetch from Google Books API', items: [] }),
-        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.', items: [] }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
