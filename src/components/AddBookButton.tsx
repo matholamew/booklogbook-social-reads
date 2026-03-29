@@ -52,35 +52,24 @@ export const AddBookButton = () => {
 
     try {
       // 1. Check or insert author
-      console.log('🔥 AddBookButton: Looking up author:', formData.author);
-      let { data: authorData, error: authorLookupError } = await supabase
+      let { data: authorData } = await supabase
         .from('authors')
         .select('id')
         .eq('name', formData.author)
         .maybeSingle();
       
-      if (authorLookupError) {
-        console.error('🔥 AddBookButton: Author lookup error:', authorLookupError);
-      }
-      
       let author_id = authorData?.id;
-      console.log('🔥 AddBookButton: Existing author_id:', author_id);
       
       if (!author_id) {
-        const insertPayload = { name: validatedData.author, created_by: user.id };
-        console.log('🔥 AddBookButton: Inserting new author with payload:', insertPayload);
-        
         const { data: newAuthor, error: insertAuthorError } = await supabase
           .from('authors')
-          .insert(insertPayload)
+          .insert({ name: validatedData.author, created_by: user.id })
           .select('id')
           .single();
         
         if (insertAuthorError) {
-          console.error('🔥 AddBookButton: Author insert error:', insertAuthorError);
-          throw new Error(`Failed to add author: ${insertAuthorError.message} (Code: ${insertAuthorError.code})`);
+          throw new Error(`Failed to add author: ${insertAuthorError.message}`);
         }
-        console.log('🔥 AddBookButton: New author created:', newAuthor);
         author_id = newAuthor.id;
       }
 
@@ -97,14 +86,6 @@ export const AddBookButton = () => {
         // Fetch cover from Google Books API via Supabase Edge Function (authenticated)
         let cover_url = null;
         try {
-          const { data: coverData, error: coverError } = await supabase.functions.invoke('get-book-cover', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
-            body: undefined,
-          });
-
-          // supabase.functions.invoke uses POST by default, but get-book-cover expects GET with query params
-          // Use fetch with the proper URL instead
           const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
           const session = (await supabase.auth.getSession()).data.session;
           if (session?.access_token && projectId) {
@@ -121,13 +102,10 @@ export const AddBookButton = () => {
             if (coverResponse.ok) {
               const data = await coverResponse.json();
               cover_url = data.coverUrl?.replace('http://', 'https://') || null;
-              console.log('AddBookButton: Got cover URL:', cover_url);
             } else {
               const errorText = await coverResponse.text();
               console.error('AddBookButton: Cover fetch failed:', coverResponse.status, errorText);
             }
-          } else {
-            console.error('AddBookButton: No session or project ID for cover fetch');
           }
         } catch (coverError) {
           console.error('AddBookButton: Error fetching cover:', coverError);
