@@ -97,28 +97,40 @@ export const AddBookButton = () => {
         // Fetch cover from Google Books API via Supabase Edge Function (authenticated)
         let cover_url = null;
         try {
-          console.log('🔥 AddBookButton: Fetching cover from Supabase Edge Function');
-          const coverResponse = await fetch(
-            `https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-                'Content-Type': 'application/json',
-              },
+          const { data: coverData, error: coverError } = await supabase.functions.invoke('get-book-cover', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            body: undefined,
+          });
+
+          // supabase.functions.invoke uses POST by default, but get-book-cover expects GET with query params
+          // Use fetch with the proper URL instead
+          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+          const session = (await supabase.auth.getSession()).data.session;
+          if (session?.access_token && projectId) {
+            const coverResponse = await fetch(
+              `https://${projectId}.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${session.access_token}`,
+                  'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                },
+              }
+            );
+
+            if (coverResponse.ok) {
+              const data = await coverResponse.json();
+              cover_url = data.coverUrl?.replace('http://', 'https://') || null;
+              console.log('AddBookButton: Got cover URL:', cover_url);
+            } else {
+              const errorText = await coverResponse.text();
+              console.error('AddBookButton: Cover fetch failed:', coverResponse.status, errorText);
             }
-          );
-          
-          if (coverResponse.ok) {
-            const data = await coverResponse.json();
-            // Ensure HTTPS to avoid mixed content issues
-            cover_url = data.coverUrl?.replace('http://', 'https://') || null;
-            console.log('🔥 AddBookButton: Got cover URL:', cover_url);
           } else {
-            console.warn('🔥 AddBookButton: Cover fetch failed:', coverResponse.status);
+            console.error('AddBookButton: No session or project ID for cover fetch');
           }
         } catch (coverError) {
-          console.error('🔥 AddBookButton: Error fetching cover:', coverError);
-          // Continue without cover if fetch fails
+          console.error('AddBookButton: Error fetching cover:', coverError);
         }
 
         const { data: newBook, error: insertBookError } = await supabase

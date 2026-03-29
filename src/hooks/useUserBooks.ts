@@ -2,8 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
-console.log('🚀 useUserBooks.ts MODULE LOADED - BUILD:', new Date().toISOString());
-
 export const useUserBooks = () => {
   const { user } = useAuth();
 
@@ -32,11 +30,6 @@ export const useUserBooks = () => {
 
       if (error) throw error;
 
-      // Debug: Log the raw structure from Supabase
-      console.log('🔍 DEBUG useUserBooks - Total books fetched:', data?.length);
-      console.log('🔍 DEBUG useUserBooks - First book raw data:', data?.[0]);
-      console.log('🔍 DEBUG useUserBooks - First book.books object:', data?.[0]?.books);
-      console.log('🔍 DEBUG useUserBooks - First book cover_url:', data?.[0]?.books?.cover_url);
       
       return data.map((userBook: any) => {
         const pageCount = userBook.books?.page_count || 0;
@@ -68,11 +61,6 @@ export const useUserBooks = () => {
           pageCount: pageCount,
           progressPercent: progressPercent,
         };
-        
-        // Debug: Log each mapped book
-        if (mapped.title.includes('Thank You for Arguing')) {
-          console.log('🔍 DEBUG Mapping "Thank You for Arguing":', mapped);
-        }
         
         return mapped;
       });
