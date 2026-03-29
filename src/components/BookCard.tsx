@@ -32,13 +32,9 @@ function parseLocalDate(dateString?: string) {
   return new Date(year, month - 1, day);
 }
 
-console.log('🔥🔥🔥 BookCard.tsx MODULE LOADED - BUILD:', new Date().toISOString());
-
 export const BookCard = ({ book, onClick }: BookCardProps) => {
-  // Use correct placeholder path (not /public/placeholder.svg)
   const displayCoverUrl = book.coverUrl || '/placeholder.svg';
   
-  console.log('🔥 BookCard:', book.title, '| coverUrl:', book.coverUrl, '| display:', displayCoverUrl);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'reading': return 'bg-slate-200 text-slate-900 hover:bg-slate-300 border border-slate-400';

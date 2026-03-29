@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 
-console.log('🚀 Index.tsx MODULE LOADED');
+
 
 type SectionType = 'reading' | 'planned' | 'finished';
 
@@ -41,13 +41,8 @@ const Index = () => {
   const booksPerPage = 10;
   const booksPerSection = 6;
 
-  console.log('Index page rendered');
 
-  useEffect(() => {
-    if (!booksLoading && userBooks.length > 0) {
-        console.log('Index.tsx: userBooks data received:', userBooks);
-        console.log('Index.tsx: First book coverUrl:', userBooks[0]?.coverUrl);
-    }
+
   }, [userBooks, booksLoading]);
 
   // Apply rating filter
