@@ -52,35 +52,24 @@ export const AddBookButton = () => {
 
     try {
       // 1. Check or insert author
-      console.log('🔥 AddBookButton: Looking up author:', formData.author);
-      let { data: authorData, error: authorLookupError } = await supabase
+      let { data: authorData } = await supabase
         .from('authors')
         .select('id')
         .eq('name', formData.author)
         .maybeSingle();
       
-      if (authorLookupError) {
-        console.error('🔥 AddBookButton: Author lookup error:', authorLookupError);
-      }
-      
       let author_id = authorData?.id;
-      console.log('🔥 AddBookButton: Existing author_id:', author_id);
       
       if (!author_id) {
-        const insertPayload = { name: validatedData.author, created_by: user.id };
-        console.log('🔥 AddBookButton: Inserting new author with payload:', insertPayload);
-        
         const { data: newAuthor, error: insertAuthorError } = await supabase
           .from('authors')
-          .insert(insertPayload)
+          .insert({ name: validatedData.author, created_by: user.id })
           .select('id')
           .single();
         
         if (insertAuthorError) {
-          console.error('🔥 AddBookButton: Author insert error:', insertAuthorError);
-          throw new Error(`Failed to add author: ${insertAuthorError.message} (Code: ${insertAuthorError.code})`);
+          throw new Error(`Failed to add author: ${insertAuthorError.message}`);
         }
-        console.log('🔥 AddBookButton: New author created:', newAuthor);
         author_id = newAuthor.id;
       }
 
@@ -97,28 +86,29 @@ export const AddBookButton = () => {
         // Fetch cover from Google Books API via Supabase Edge Function (authenticated)
         let cover_url = null;
         try {
-          console.log('🔥 AddBookButton: Fetching cover from Supabase Edge Function');
-          const coverResponse = await fetch(
-            `https://fabdzoyrghfjvxbgdgnm.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`,
-            {
-              headers: {
-                'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-                'Content-Type': 'application/json',
-              },
+          const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+          const session = (await supabase.auth.getSession()).data.session;
+          if (session?.access_token && projectId) {
+            const coverResponse = await fetch(
+              `https://${projectId}.supabase.co/functions/v1/get-book-cover?title=${encodeURIComponent(validatedData.title)}&author=${encodeURIComponent(validatedData.author)}`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${session.access_token}`,
+                  'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                },
+              }
+            );
+
+            if (coverResponse.ok) {
+              const data = await coverResponse.json();
+              cover_url = data.coverUrl?.replace('http://', 'https://') || null;
+            } else {
+              const errorText = await coverResponse.text();
+              console.error('AddBookButton: Cover fetch failed:', coverResponse.status, errorText);
             }
-          );
-          
-          if (coverResponse.ok) {
-            const data = await coverResponse.json();
-            // Ensure HTTPS to avoid mixed content issues
-            cover_url = data.coverUrl?.replace('http://', 'https://') || null;
-            console.log('🔥 AddBookButton: Got cover URL:', cover_url);
-          } else {
-            console.warn('🔥 AddBookButton: Cover fetch failed:', coverResponse.status);
           }
         } catch (coverError) {
-          console.error('🔥 AddBookButton: Error fetching cover:', coverError);
-          // Continue without cover if fetch fails
+          console.error('AddBookButton: Error fetching cover:', coverError);
         }
 
         const { data: newBook, error: insertBookError } = await supabase
