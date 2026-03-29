@@ -13,19 +13,7 @@ export const ActivityFeed = () => {
     queryFn: async () => {
       if (!user) return [];
       
-      // 1. Get friend IDs
-      const { data: follows, error: followsError } = await supabase
-        .from('user_follows')
-        .select('following_id')
-        .eq('follower_id', user.id);
-      if (followsError) throw followsError;
-      let friendIds = follows?.map(f => f.following_id) || [];
-      // Exclude the current user's own ID if present
-      friendIds = friendIds.filter(id => id !== user.id);
-
-      if (friendIds.length === 0) return [];
-
-      // 2. Get recent book activities from user_books
+      // Get the current user's own recent book activities
       const { data: bookActivities, error: bookError } = await supabase
         .from('user_books')
         .select(`
@@ -38,87 +26,38 @@ export const ActivityFeed = () => {
           books (
             title,
             authors (name)
-          ),
-          profiles:profiles!user_id (
-            display_name,
-            username,
-            avatar_url
           )
         `)
-        .in('user_id', friendIds)
+        .eq('user_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(20);
 
       if (bookError) throw bookError;
 
-      // 3. Get recent profile updates
-      const { data: profileActivities, error: profileError } = await supabase
+      // Get the user's own profile for display
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          display_name,
-          username,
-          avatar_url,
-          bio,
-          updated_at
-        `)
-        .in('id', friendIds)
-        .order('updated_at', { ascending: false })
-        .limit(10);
-
+        .select('display_name, username, avatar_url')
+        .eq('id', user.id)
+        .single();
       if (profileError) throw profileError;
 
-      // 4. Combine and sort all activities by updated_at
-      const allActivities = [
-        ...(bookActivities || []).map((activity: any) => ({
-          id: `book-${activity.id}`,
-          type: 'book',
-          data: activity,
-          updated_at: activity.updated_at,
-          user: activity.profiles
-        })),
-        ...(profileActivities || []).map((activity: any) => ({
-          id: `profile-${activity.id}`,
-          type: 'profile',
-          data: activity,
-          updated_at: activity.updated_at,
-          user: activity
-        }))
-      ];
+      const userName = profile?.display_name || profile?.username || 'You';
+      const userInitials = userName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+      const avatarUrl = profile?.avatar_url || '';
 
-      // Sort by updated_at and take top 10
-      return allActivities
-        .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-        .slice(0, 10)
-        .map((activity: any) => {
-          if (activity.type === 'book') {
-            return {
-              id: activity.id,
-              userName: activity.user?.display_name || activity.user?.username || 'Unknown',
-              userInitials: (activity.user?.display_name || activity.user?.username || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2),
-              avatarUrl: activity.user?.avatar_url || '',
-              action: getBookAction(activity.data),
-              bookTitle: activity.data.books?.title || 'Unknown Title',
-              bookAuthor: activity.data.books?.authors?.name || 'Unknown Author',
-              timestamp: new Date(activity.updated_at).toLocaleString(),
-              note: activity.data.notes || '',
-              type: 'book'
-            };
-          } else {
-            return {
-              id: activity.id,
-              userName: activity.user?.display_name || activity.user?.username || 'Unknown',
-              userInitials: (activity.user?.display_name || activity.user?.username || 'U').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0,2),
-              avatarUrl: activity.user?.avatar_url || '',
-              action: 'updated their profile',
-              bookTitle: '',
-              bookAuthor: '',
-              timestamp: new Date(activity.updated_at).toLocaleString(),
-              note: '',
-              type: 'profile'
-            };
-          }
-        });
+      return (bookActivities || []).slice(0, 10).map((activity: any) => ({
+        id: `book-${activity.id}`,
+        userName,
+        userInitials,
+        avatarUrl,
+        action: getBookAction(activity),
+        bookTitle: activity.books?.title || 'Unknown Title',
+        bookAuthor: activity.books?.authors?.name || 'Unknown Author',
+        timestamp: new Date(activity.updated_at).toLocaleString(),
+        note: activity.notes || '',
+        type: 'book'
+      }));
     },
     enabled: !!user,
     refetchOnWindowFocus: true,
@@ -155,7 +94,7 @@ export const ActivityFeed = () => {
         {isLoading && <div className="text-slate-600">Loading activity...</div>}
         {error && <div className="text-red-600">Error loading activity.</div>}
         {activities && activities.length === 0 && !isLoading && (
-          <div className="text-slate-600">No recent activity from you or your friends yet.</div>
+          <div className="text-slate-600">No recent activity yet.</div>
         )}
         {activities && activities.map((activity) => (
           <div key={activity.id} className="transition-all duration-300 hover:scale-[1.01] cursor-pointer flex items-start gap-3 p-3 rounded-lg hover:bg-slate-100 border border-slate-200 bg-white active:scale-[0.99]">
