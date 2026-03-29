@@ -2,17 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Book, Calendar, User } from 'lucide-react';
 import { useState } from 'react';
 import { FollowingModal } from './FollowingModal';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface StatsOverviewProps {
   totalBooks?: number;
   booksThisYear?: number;
   following?: number;
+  isLoading?: boolean;
 }
 
 export const StatsOverview = ({ 
-  totalBooks = 47, 
-  booksThisYear = 12, 
-  following = 8 
+  totalBooks = 0, 
+  booksThisYear = 0, 
+  following = 0,
+  isLoading = false,
 }: StatsOverviewProps) => {
   const [followingModalOpen, setFollowingModalOpen] = useState(false);
   return (
@@ -23,7 +26,7 @@ export const StatsOverview = ({
           <Book className="h-4 w-4 text-slate-700" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-slate-900">{totalBooks}</div>
+          {isLoading ? <Skeleton className="h-8 w-12 mb-1" /> : <div className="text-2xl font-bold text-slate-900">{totalBooks}</div>}
           <p className="text-xs text-slate-700">All time reading</p>
         </CardContent>
       </Card>
@@ -34,7 +37,7 @@ export const StatsOverview = ({
           <Calendar className="h-4 w-4 text-slate-700" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-slate-900">{booksThisYear}</div>
+          {isLoading ? <Skeleton className="h-8 w-12 mb-1" /> : <div className="text-2xl font-bold text-slate-900">{booksThisYear}</div>}
           <p className="text-xs text-slate-700">Books read in {new Date().getFullYear()}</p>
         </CardContent>
       </Card>
@@ -45,7 +48,7 @@ export const StatsOverview = ({
           <User className="h-4 w-4 text-slate-700" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-slate-900">{following}</div>
+          {isLoading ? <Skeleton className="h-8 w-12 mb-1" /> : <div className="text-2xl font-bold text-slate-900">{following}</div>}
           <p className="text-xs text-slate-700">Friends & family</p>
         </CardContent>
       </Card>
