@@ -17,24 +17,30 @@ export const useUserStats = () => {
     queryFn: async (): Promise<UserStats> => {
       if (!user) return { totalBooks: 0, booksThisYear: 0, following: 0 };
 
-      // Get total books
-      const { count: totalBooks, error: totalError } = await supabase
+      // Read once, then compute deduplicated stats to avoid inflated counts from duplicate entries
+      const { data: userBookRows, error: booksError } = await supabase
         .from('user_books')
-        .select('*', { count: 'exact', head: true })
+        .select('book_id, status, date_finished')
         .eq('user_id', user.id);
 
-      if (totalError) throw totalError;
+      if (booksError) throw booksError;
 
-      // Get books this year
+      const rows = userBookRows || [];
+      const totalBooks = new Set(rows.map((row) => row.book_id)).size;
+
       const currentYear = new Date().getFullYear();
-      const { count: booksThisYear, error: yearError } = await supabase
-        .from('user_books')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('date_finished', `${currentYear}-01-01`)
-        .lte('date_finished', `${currentYear}-12-31`);
+      const yearStart = new Date(currentYear, 0, 1);
+      const yearEnd = new Date(currentYear + 1, 0, 1);
 
-      if (yearError) throw yearError;
+      const booksThisYear = new Set(
+        rows
+          .filter((row) => {
+            if (row.status !== 'finished' || !row.date_finished) return false;
+            const finishedDate = new Date(row.date_finished);
+            return finishedDate >= yearStart && finishedDate < yearEnd;
+          })
+          .map((row) => row.book_id)
+      ).size;
 
       // Get following count
       const { count: following, error: followingError } = await supabase
@@ -45,8 +51,8 @@ export const useUserStats = () => {
       if (followingError) throw followingError;
 
       return {
-        totalBooks: totalBooks || 0,
-        booksThisYear: booksThisYear || 0,
+        totalBooks,
+        booksThisYear,
         following: following || 0,
       };
     },
