@@ -43,8 +43,6 @@ const Index = () => {
 
 
 
-  }, [userBooks, booksLoading]);
-
   // Apply rating filter
   const applyRatingFilter = (books: typeof userBooks) => {
     if (ratingFilter === null) return books;
